@@ -4,15 +4,8 @@
 // All other rights reserved.
 
 // Change history:
-// 01/30/2012 - EFW - Fixed WriteValue() so that it outputs numeric attribute values.
-// 02/09/2012 - EFW - Added support for optional parameters and property getter/setter attributes.
-// 02/14/2012 - EFW - Added support for fixed keyword
-// 11/29/2013 - EFW - Added support for metadata based interop attributes
-// 12/20/2013 - EFW - Updated the syntax generator to be discoverable via MEF
-// 08/01/2014 - EFW - Added support for resource item files containing the localized titles, messages, etc.
-// 11/20/2014 - EFW - Added support for writing out method parameter attributes
-// 10/08/2015 - EFW - Added support for writing out the value of constant fields
-
+// 03/20/2017 - RvdH Created initial X# language support
+// 05/10/2018 - RvdH Adjusted X# type names and replaced reference links with keywords
 using System;
 using System.Globalization;
 using System.IO;
@@ -75,7 +68,7 @@ namespace Microsoft.Ddue.Tools
 
             //System.Diagnostics.Debugger.Launch();
             string name = reflection.Evaluate(apiNameExpression).ToString();
-            InFunctionsClass = (string.Compare(name, "Functions", true) == 0);
+            InFunctionsClass = (String.Compare(name, "Functions", true) == 0);
             bool isAbstract = (bool)reflection.Evaluate(apiIsAbstractTypeExpression);
             bool isSealed = (bool)reflection.Evaluate(apiIsSealedTypeExpression);
             bool isSerializable = (bool)reflection.Evaluate(apiIsSerializableTypeExpression);
@@ -278,22 +271,23 @@ namespace Microsoft.Ddue.Tools
         /// <param name="writer">The syntax writer to which the type reference is written</param>
         protected override void WriteNormalTypeReference(string api, SyntaxWriter writer)
         {
+            //System.Diagnostics.Trace.WriteLine(api);
             switch (api)
             {
                 case "T:System.Void":
-                    writer.WriteReferenceLink(api, "VOID");
+                    writer.WriteKeyword("VOID");
                     break;
 
                 case "T:System.String":
-                    writer.WriteReferenceLink(api, "STRING");
+                    writer.WriteKeyword("STRING");
                     break;
 
                 case "T:System.Boolean":
-                    writer.WriteReferenceLink(api, "LOGIC");
+                    writer.WriteKeyword("LOGIC");
                     break;
 
                 case "T:System.Byte":
-                    writer.WriteReferenceLink(api, "BYTE");
+                    writer.WriteKeyword("BYTE");
                     break;
 
                 case "T:System.SByte":
@@ -301,71 +295,82 @@ namespace Microsoft.Ddue.Tools
                     break;
 
                 case "T:System.Char":
-                    writer.WriteReferenceLink(api, "CHAR");
+                    writer.WriteKeyword("CHAR");
                     break;
 
                 case "T:System.Int16":
-                    writer.WriteReferenceLink(api, "SHORT");
+                    writer.WriteKeyword("SHORT");
                     break;
 
                 case "T:System.Int32":
-                    writer.WriteReferenceLink(api, "LONG");
+                    writer.WriteKeyword("LONG");
                     break;
 
                 case "T:System.Int64":
-                    writer.WriteReferenceLink(api, "INT64");
+                    writer.WriteKeyword("INT64");
                     break;
 
                 case "T:System.UInt16":
-                    writer.WriteReferenceLink(api, "WORD");
+                    writer.WriteKeyword("WORD");
                     break;
 
                 case "T:System.UInt32":
-                    writer.WriteReferenceLink(api, "DWORD");
+                    writer.WriteKeyword("DWORD");
                     break;
 
                 case "T:System.UInt64":
-                    writer.WriteReferenceLink(api, "UINT64");
+                    writer.WriteKeyword( "UINT64");
                     break;
 
                 case "T:System.Single":
-                    writer.WriteReferenceLink(api, "REAL4");
+                    writer.WriteKeyword("REAL4");
                     break;
 
                 case "T:System.Double":
-                    writer.WriteReferenceLink(api, "REAL8");
+                    writer.WriteKeyword("REAL8");
                     break;
 
                 case "T:System.Decimal":
-                    writer.WriteReferenceLink(api, "DECIMAL");
+                    writer.WriteKeyword("DECIMAL");
                     break;
 
                 case "T:Vulcan.__Array":
-                    writer.WriteReferenceLink(api, "ARRAY");
+                case "T:XSharp.__Array":
+                    writer.WriteKeyword("ARRAY");
+                    break;
+
+                case "T:XSharp.__ArrayBase`1":
+                    writer.WriteKeyword("ARRAY OF");
                     break;
 
                 case "T:Vulcan.__Usual":
-                    writer.WriteReferenceLink(api, "USUAL");
+                case "T:XSharp.__Usual":
+                    writer.WriteKeyword("USUAL");
                     break;
 
                 case "T:Vulcan.__Psz":
-                    writer.WriteReferenceLink(api, "PSZ");
+                case "T:XSharp.__Psz":
+                    writer.WriteKeyword("PSZ");
                     break;
 
                 case "T:Vulcan.__VOFloat":
-                    writer.WriteReferenceLink(api, "FLOAT");
+                case "T:XSharp.__VOFloat":
+                    writer.WriteKeyword("FLOAT");
                     break;
 
                 case "T:Vulcan.__VODate":
-                    writer.WriteReferenceLink(api, "DATE");
+                case "T:XSharp.__VODate": 
+                    writer.WriteKeyword("DATE");
                     break;
 
                 case "T:Vulcan.__Symbol":
-                    writer.WriteReferenceLink(api, "SYMBOL");
+                case "T:XSharp.__Symbol":
+                    writer.WriteKeyword("SYMBOL");
                     break;
 
                 case "T:Vulcan.__WinBool":
-                    writer.WriteReferenceLink(api, "LOGIC");
+                case "T:XSharp.__WinBool":
+                    writer.WriteKeyword("LOGIC");
                     break;
 
                 default:
@@ -869,11 +874,18 @@ namespace Microsoft.Ddue.Tools
                   type.GetAttribute("api", String.Empty) == "T:System.Runtime.CompilerServices.FixedBufferAttribute" ||
                   type.GetAttribute("api", String.Empty) == "T:System.ParamArrayAttribute")
                     continue;
-
-                if (type.GetAttribute("api", String.Empty) == "T:Vulcan.Internal.ClipperCallingConventionAttribute")
+                // RvdH do not output Clipper calling convention attribute
+                // we may want to remember this and base the parameters on this later
+                var att = type.GetAttribute("api", String.Empty);
+                if (att == "T:Vulcan.Internal.ClipperCallingConventionAttribute")
+                    continue;
+                if (att == "T:XSharp.Internal.ClipperCallingConventionAttribute")
                     continue;
 
-                if (!String.IsNullOrEmpty(indent))
+                if (att == "T:XSharp.Internal.DefaultParameterValueAttribute")
+                    continue;
+                 
+                if(!String.IsNullOrEmpty(indent))
                     writer.WriteString(indent);
 
                 writer.WriteString("[");
@@ -1114,7 +1126,7 @@ namespace Microsoft.Ddue.Tools
                     WriteAttribute("T:System.Runtime.InteropServices.PreserveSigAttribute", true, writer);
         }
 
-        private void WriteValue(XPathNavigator parent, SyntaxWriter writer)
+        private void WriteValue(XPathNavigator parent, SyntaxWriter writer, string typeName = "")
         {
             XPathNavigator type = parent.SelectSingleNode(attributeTypeExpression);
             XPathNavigator value = parent.SelectSingleNode(valueExpression);
@@ -1122,9 +1134,29 @@ namespace Microsoft.Ddue.Tools
             switch(value.LocalName)
             {
                 case "nullValue":
-                    writer.WriteKeyword("NULL");
+                    switch (typeName)
+                    {
+                        case "T:Vulcan.__Usual":
+                        case "T:XSharp.__Usual":
+                            writer.WriteKeyword("NIL");
+                            break;
+                        case "T:Vulcan.__Symbol":
+                        case "T:XSharp.__Symbol":
+                            writer.WriteKeyword("NULL_SYMBOL");
+                            break;
+                        case "T:Vulcan.__VODate":
+                        case "T:XSharp.__VODate":
+                            writer.WriteKeyword("NULL_DATE");
+                            break;
+                        case "T:Vulcan.__Array":
+                        case "T:XSharp.__Array":
+                            writer.WriteKeyword("NULL_ARRAY");
+                            break;
+                        default:
+                            writer.WriteKeyword("NULL");
+                            break;
+                    }
                     break;
-
                 case "typeValue":
                     writer.WriteKeyword("TYPEOF");
                     writer.WriteString("(");
@@ -1184,7 +1216,7 @@ namespace Microsoft.Ddue.Tools
 
                         case "T:System.Single":
                             writer.WriteString(text);
-                            writer.WriteString("f");
+                            //writer.WriteString("f");
                             break;
 
                         default:
@@ -1194,7 +1226,7 @@ namespace Microsoft.Ddue.Tools
                             else
                             {
                                 // It's an array.  We don't get the values so just write out the type.
-                                writer.WriteString("new ");
+                                //writer.WriteString("new ");
                                 this.WriteTypeReference(type, writer);
                                 writer.WriteString(" { ... }");
                             }
@@ -1471,7 +1503,8 @@ namespace Microsoft.Ddue.Tools
                 if(argument != null)
                 {
                     writer.WriteString(" := ");
-                    this.WriteValue(argument, writer);
+                    string typename = type.GetAttribute("api", String.Empty);
+                    this.WriteValue(argument, writer, typename);
                 }
 
                 if(parameters.CurrentPosition < parameters.Count)
