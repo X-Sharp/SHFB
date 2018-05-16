@@ -2,7 +2,7 @@
 // System  : Sandcastle Help File Builder MSBuild Tasks
 // File    : MSBuildProject.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/19/2017
+// Updated : 05/07/2017
 // Note    : Copyright 2008-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -159,7 +159,9 @@ namespace SandcastleBuilder.Utils.MSBuild
                         if(String.Compare(outputType, "Exe", StringComparison.OrdinalIgnoreCase) == 0 ||
                           String.Compare(outputType, "WinExe", StringComparison.OrdinalIgnoreCase) == 0 ||
                           String.Compare(outputType, "AppContainerExe", StringComparison.OrdinalIgnoreCase) == 0)
+                        {
                             assemblyName += ".exe";
+                        }
                         else
                             if(String.Compare(outputType, "winmdobj", StringComparison.OrdinalIgnoreCase) == 0)
                                 assemblyName += ".winmd";
@@ -172,6 +174,25 @@ namespace SandcastleBuilder.Utils.MSBuild
                         else
                             assemblyName = Path.Combine(Path.Combine(Path.GetDirectoryName(
                                 msBuildProject.FullPath), outputPath), assemblyName);
+
+                    // .NETCoreApp projects don't seem to return the correct output type
+                    if(!File.Exists(assemblyName) && this.TargetFrameworkIdentifier == PlatformType.DotNetCoreApp)
+                        assemblyName = Path.ChangeExtension(assemblyName, "dll");
+
+                    // If the TargetFrameworks property is used, the assembly is most likely in a subfolder
+                    // under the output folder based on one of the target frameworks specified.
+                    if(!File.Exists(assemblyName) && properties.TryGetValue("TargetFrameworks", out prop))
+                    {
+                        outputPath = Path.GetDirectoryName(assemblyName);
+
+                        foreach(string subfolder in prop.EvaluatedValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+                            if(Directory.EnumerateFiles(Path.Combine(outputPath, subfolder),
+                              Path.GetFileName(assemblyName)).Any())
+                            {
+                                assemblyName = Path.Combine(outputPath, subfolder, Path.GetFileName(assemblyName));
+                                break;
+                            }
+                    }
                 }
 
                 return assemblyName;
@@ -326,7 +347,13 @@ namespace SandcastleBuilder.Utils.MSBuild
                 }
 
                 if(versionValue == null)
+                {
+                    // If not found but TargetFrameworks is specified, just assume some version of .NETFramework
+                    if(properties.TryGetValue("TargetFrameworks", out prop))
+                        return "4.5.2";
+
                     throw new InvalidOperationException("Unable to determine target framework version for project");
+                }
 
                 if(versionValue[0] == 'v')
                     versionValue = versionValue.Substring(1);
@@ -532,26 +559,25 @@ namespace SandcastleBuilder.Utils.MSBuild
         }
 
         /// <summary>
-        /// Clone the project's reference information and add it to the
-        /// given dictionary.
+        /// Clone the project's reference information and add it to the given dictionary
         /// </summary>
-        /// <param name="references">The dictionary used to contain the
-        /// cloned reference information</param>
-        internal void CloneReferenceInfo(Dictionary<string, Tuple<string, string,
-          List<KeyValuePair<string, string>>>> references)
+        /// <param name="resolver">The package reference resolver to use</param>
+        /// <param name="references">The dictionary used to contain the cloned reference information</param>
+        internal void CloneReferenceInfo(PackageReferenceResolver resolver, Dictionary<string,
+          Tuple<string, string, List<KeyValuePair<string, string>>>> references)
         {
             string rootPath, path;
 
             rootPath = Path.GetDirectoryName(msBuildProject.FullPath);
 
-            // Nested project references are ignored.  We'll assume that they exist in the
-            // folder with the target and they'll be found automatically.  
+            // Nested project references are ignored.  We'll assume that they exist in the folder with the target
+            // and they'll be found automatically.  
             foreach(string refType in (new string[] { "Reference", "COMReference" }))
                 foreach(ProjectItem reference in msBuildProject.GetItems(refType))
                     if(!references.ContainsKey(reference.EvaluatedInclude))
                     {
-                        var metadata = reference.Metadata.Select(m => new KeyValuePair<string, string>(
-                            m.Name, m.EvaluatedValue)).ToList();
+                        var metadata = reference.Metadata.Select(m => new KeyValuePair<string, string>(m.Name,
+                            m.EvaluatedValue)).ToList();
                         var hintPath = metadata.FirstOrDefault(m => m.Key == "HintPath");
 
                         // Convert relative paths to absolute paths
@@ -570,6 +596,21 @@ namespace SandcastleBuilder.Utils.MSBuild
                         references.Add(reference.EvaluatedInclude, Tuple.Create(reference.ItemType,
                             reference.EvaluatedInclude, metadata));
                     }
+
+            // Resolve any package references by converting them to regular references
+            if(resolver.LoadPackageReferenceInfo(msBuildProject))
+                foreach(string pr in resolver.ReferenceAssemblies)
+                {
+                    string refName = Path.GetFileNameWithoutExtension(pr);
+
+                    if(!references.ContainsKey(refName) && File.Exists(pr))
+                        references.Add(refName, Tuple.Create("Reference", refName,
+                            new List<KeyValuePair<string, string>>
+                            {
+                                new KeyValuePair<string, string>("HintPath", pr),
+                                new KeyValuePair<string, string>("FromPackageReference", "true")
+                            }));
+                }
         }
         #endregion
     }

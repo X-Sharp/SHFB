@@ -14,6 +14,8 @@
 // 08/06/2014 - EFW - Added code to write out values for literal (constant) fields.
 // 08/23/2016 - EFW - Added support for writing out source code context
 // 03/17/2017 - EFW - Added support for value tuples
+// 05/26/2017 - EFW - Fixed up issues with unsigned long enumerated types and duplicate flag values
+// 05/30/2017 - JRC - Fixed issue with negative enums
 
 using System;
 using System.Collections.Generic;
@@ -327,7 +329,7 @@ namespace Microsoft.Ddue.Tools
                 {
                     // Look for an exact match by type name
                     matches = matches.Where(m => Path.GetFileNameWithoutExtension(m).EndsWith(searchPattern,
-                        StringComparison.Ordinal)).ToList();
+                        StringComparison.OrdinalIgnoreCase)).ToList();
 
                     if(matches.Count != 1)
                     {
@@ -355,7 +357,8 @@ namespace Microsoft.Ddue.Tools
                         sourceFile = matches[0];
                 }
                 else
-                    if(matches.Count == 1)
+                    if(matches.Count == 1 && Path.GetFileNameWithoutExtension(matches[0]).EndsWith(searchPattern,
+                      StringComparison.OrdinalIgnoreCase))
                         sourceFile = matches[0];
 
                 if(sourceFile != null && sourceFile.StartsWith(this.SourceCodeBasePath, StringComparison.OrdinalIgnoreCase))
@@ -564,14 +567,48 @@ namespace Microsoft.Ddue.Tools
 
                 if(field.DefaultValue != null)
                 {
-                    long fieldValue = Convert.ToInt64(field.DefaultValue.Value, CultureInfo.InvariantCulture);
+                   long fieldValue;
 
-                    // If a single field matches, return it.  Otherwise return all fields that are in value.
+                    if(field.DefaultValue.Value is ulong)
+                        fieldValue = unchecked((long)(ulong)field.DefaultValue.Value);
+                    else
+                        fieldValue = Convert.ToInt64(field.DefaultValue.Value, CultureInfo.InvariantCulture);
+
+                    // If a single field matches, return it.  Otherwise return all fields that are in the value
+                    // except zero.
                     if(fieldValue == value)
                         return new[] { field };
 
-                    if((fieldValue & value) == fieldValue)
+                    if(fieldValue != 0 && (fieldValue & value) == fieldValue)
                         list.Add(field);
+                }
+            }
+
+            // Remove duplicates that are in combo values. For example, in the set A, B, AplusB, remove A and B
+            // because they are present in the combined value AplusB).
+            for(int i = 0; i < list.Count; i++)
+            {
+                long fieldValue;
+
+                if(list[i].DefaultValue.Value is ulong)
+                    fieldValue = unchecked((long)(ulong)list[i].DefaultValue.Value);
+                else
+                    fieldValue = Convert.ToInt64(list[i].DefaultValue.Value, CultureInfo.InvariantCulture);
+
+                if(list.Skip(i + 1).Any(f =>
+                {
+                    long compare;
+
+                    if (f.DefaultValue.Value is ulong)
+                        compare = unchecked((long)(ulong)f.DefaultValue.Value);
+                    else
+                        compare = Convert.ToInt64(f.DefaultValue.Value, CultureInfo.InvariantCulture);
+
+                    return ((fieldValue & compare) == fieldValue);
+                }))
+                {
+                    list.RemoveAt(i);
+                    i--;
                 }
             }
 
@@ -1800,6 +1837,9 @@ namespace Microsoft.Ddue.Tools
                     EnumNode enumeration = (EnumNode)type;
 
                     writer.WriteStartElement("enumValue");
+
+                    if(value is ulong)
+                        value = unchecked((long)(ulong)value);
 
                     foreach(var field in GetAppliedFields(enumeration, Convert.ToInt64(value, CultureInfo.InvariantCulture)))
                     {

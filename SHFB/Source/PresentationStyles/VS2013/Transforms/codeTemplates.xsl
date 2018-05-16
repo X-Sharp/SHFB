@@ -23,6 +23,9 @@
 			<xsl:when test="$v_codeLangLC = 'html' or $v_codeLangLC = 'htm'">
 				<xsl:text>HTML</xsl:text>
 			</xsl:when>
+			<xsl:when test="$v_codeLangLC = 'bat' or $v_codeLangLC = 'batch'">
+				<xsl:text>batch</xsl:text>
+			</xsl:when>
 			<xsl:when test="$v_codeLangLC = 'pshell' or $v_codeLangLC = 'powershell' or $v_codeLangLC = 'ps1'">
 				<xsl:text>PShell</xsl:text>
 			</xsl:when>
@@ -111,12 +114,12 @@
 								</xsl:attribute>
 								<xsl:choose>
 									<xsl:when test="$v_nodeCount = 1">
-										<include item="devlang_{@codeLanguage}" />
+										<include item="devlang_{@codeLanguage}" undefined="{@codeLanguage}"/>
 									</xsl:when>
 									<xsl:otherwise>
 										<!-- Use onclick rather than href or HV 2.0 messes up the link -->
 										<a href="#" onclick="javascript:ChangeTab('{$v_id}','{@style}','{position()}','{$v_nodeCount}');return false;">
-											<include item="devlang_{@codeLanguage}" />
+											<include item="devlang_{@codeLanguage}" undefined="{@codeLanguage}"/>
 										</a>
 									</xsl:otherwise>
 								</xsl:choose>
@@ -207,14 +210,14 @@
 												<xsl:value-of select="@title" />
 											</xsl:when>
 											<xsl:otherwise>
-												<include item="devlang_{@codeLanguage}" />
+												<include item="devlang_{@codeLanguage}" undefined="{@codeLanguage}"/>
 											</xsl:otherwise>
 										</xsl:choose>
 									</xsl:when>
 									<xsl:otherwise>
 										<!-- Use onclick rather than href or HV 2.0 messes up the link -->
 										<a href="#" onclick="javascript:ChangeTab('{$v_id}','{@style}','{position()}','{$v_nodeCount}');return false;">
-											<include item="devlang_{@codeLanguage}" />
+											<include item="devlang_{@codeLanguage}" undefined="{@codeLanguage}"/>
 										</a>
 									</xsl:otherwise>
 								</xsl:choose>

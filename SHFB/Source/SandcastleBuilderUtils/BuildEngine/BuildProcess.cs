@@ -2,8 +2,8 @@
 // System  : Sandcastle Help File Builder Utilities
 // File    : BuildProcess.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/25/2016
-// Note    : Copyright 2006-2016, Eric Woodruff, All rights reserved
+// Updated : 01/23/2018
+// Note    : Copyright 2006-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the thread class that handles all aspects of the build process.
@@ -941,6 +941,14 @@ namespace SandcastleBuilder.Utils.BuildEngine
                 // XML comments files to the working folder.
                 this.ValidateDocumentationSources();
 
+                // If the framework reflection data is still set to the .NETStandard placeholder, there were no
+                // project documentation sources.  As such, switch to the most recent .NET Framework.
+                if(frameworkReflectionData.Platform == PlatformType.DotNetStandard)
+                {
+                    frameworkReflectionData = reflectionDataDictionary.CoreFrameworkMostRecent(PlatformType.DotNetFramework);
+                    project.FrameworkVersion = frameworkReflectionData.Title;
+                }
+
                 // Transform the shared builder content files
                 language = project.Language;
                 languageFile = Path.Combine(presentationStyle.ResolvePath(presentationStyle.ToolResourceItemsPath),
@@ -984,6 +992,10 @@ namespace SandcastleBuilder.Utils.BuildEngine
                     substitutionTags.TransformTemplate(Path.GetFileName(languageFile), Path.GetDirectoryName(languageFile),
                         workingFolder);
                     File.Move(workingFolder + Path.GetFileName(languageFile), workingFolder + "SHFBContent.xml");
+
+                    if((project.HelpFileFormat & HelpFileFormats.Website) != 0)
+                        substitutionTags.TransformTemplate("WebsiteContent.xml", Path.GetDirectoryName(languageFile),
+                            workingFolder);
 
                     // Copy the stop word list
                     languageFile = Path.Combine(ComponentUtilities.ToolsFolder, @"PresentationStyles\Shared\" +
@@ -1110,6 +1122,33 @@ namespace SandcastleBuilder.Utils.BuildEngine
 
                 // Generate namespace summary information
                 this.GenerateNamespaceSummaries();
+
+                // For any reference assemblies that have a hint path, add any matching XML comments file to
+                // the comments file collection for base class comments.  We add these after generating namespace
+                // summaries as these aren't relevant to that step and we don't want to modify them.  We also
+                // want the project documentation source XML files to override comments in these if there's a
+                // conflict so we add them ahead of all other comments files.  We still need to copy the files as
+                // the rest of the build process expects them to be in the working folder.
+                foreach(var r in referenceDictionary.Values.Where(r => r.Item3.Any(v => v.Key == "HintPath")))
+                {
+                    string comments = Path.ChangeExtension(r.Item3.First(kv => kv.Key == "HintPath").Value, ".xml");
+                    string workingPath = workingFolder + Path.GetFileName(comments);
+                    int idx = 0;
+
+                    if(File.Exists(comments) && !commentsFiles.Any(c => c.SourcePath == workingPath))
+                    {
+                        File.Copy(comments, workingPath, true);
+                        File.SetAttributes(workingPath, FileAttributes.Normal);
+
+                        commentsFiles.Insert(idx++, new XmlCommentsFile(workingPath));
+                    }
+                }
+
+                // Issue a warning if any invalid XML comments files are found.  These will be ignored.  These
+                // occur most often in NuGet packages.  Contact the package owner if you want them fixed.
+                foreach(var f in commentsFiles.Where(cf => !cf.IsValid))
+                    this.ReportWarning("BE0031", "Ignoring invalid XML comments file '{0}'.  Reason: {1}",
+                        f.SourcePath, f.InvalidReason);
 
                 // Expand <inheritdoc /> tags?
                 if(commentsFiles.ContainsInheritedDocumentation)
@@ -2074,8 +2113,8 @@ AllDone:
         {
             List<string> commentsList = new List<string>();
             Dictionary<string, MSBuildProject> projectDictionary = new Dictionary<string, MSBuildProject>();
-            HashSet<string> targetFrameworksSeen = new HashSet<string>(),
-                targetFrameworkVersionsSeen = new HashSet<string>();
+            HashSet<Tuple<string, string>> targetFrameworksSeen = new HashSet<Tuple<string, string>>();
+            PackageReferenceResolver packageReferenceResolver = new PackageReferenceResolver(this);
 
             MSBuildProject projRef;
             XPathDocument testComments;
@@ -2296,32 +2335,25 @@ AllDone:
                         }
 
                         // Note the platforms seen and the highest framework version used
-                        targetFrameworksSeen.Add(msbProject.TargetFrameworkIdentifier);
-                        targetFrameworkVersionsSeen.Add(msbProject.TargetFrameworkVersion);
+                        targetFrameworksSeen.Add(Tuple.Create(msbProject.TargetFrameworkIdentifier,
+                            msbProject.TargetFrameworkVersion));
 
                         // Clone the project's reference information
-                        msbProject.CloneReferenceInfo(referenceDictionary);
+                        msbProject.CloneReferenceInfo(packageReferenceResolver, referenceDictionary);
                     }
 
-                    // If we saw multiple framework types in the projects, stop now.  Due to the different
-                    // assemblies used, we cannot mix the project types within the same SHFB project.  They will
-                    // need to be documented separately and can be merged using the Version Builder plug-in if
-                    // needed.
-                    if(targetFrameworksSeen.Count > 1)
+                    // If we saw multiple incompatible framework types in the projects, stop now.  Due to the
+                    // different assemblies used, we cannot mix the project types within the same SHFB project.
+                    // They will need to be documented separately and can be merged using the Version Builder
+                    // plug-in if needed.
+                    if(targetFrameworksSeen.Count > 1 && !PlatformType.PlatformsAreCompatible(targetFrameworksSeen.Select(t => t.Item1)))
                         throw new BuilderException("BE0070", "Differing framework types were detected in the " +
                             "documentation sources (i.e. .NET, Silverlight, Portable).  Due to the different " +
                             "sets of assemblies used, the different frameworks cannot be mixed within the same " +
                             "documentation project.  See the error number topic in the help file for details.");
 
-                    // If a project with a higher framework version was found, switch to that version now
-                    var projectFramework = reflectionDataDictionary.CoreFrameworkMatching(
-                        targetFrameworksSeen.First(), new Version(targetFrameworkVersionsSeen.Max(f => f)), true);
-
-                    // .NETStandard is a bit odd.  Its outputs can be used by various frameworks so we'll just
-                    // defer to whatever the user has selected.  If it fails due to version mismatches, they'll
-                    // probably just need to pick a more appropriate framework version.
-                    if(projectFramework == null && targetFrameworksSeen.First().StartsWith(".NETStandard", StringComparison.Ordinal))
-                        projectFramework = frameworkReflectionData;
+                    // Find the best matching set of framework reflection data
+                    var projectFramework = reflectionDataDictionary.BestMatchFor(targetFrameworksSeen);
 
                     if(frameworkReflectionData != projectFramework)
                     {
@@ -2329,13 +2361,14 @@ AllDone:
                         if(projectFramework == null)
                             throw new BuilderException("BE0073", String.Format(CultureInfo.CurrentCulture,
                                 "A project with a different or higher framework version was found but that " +
-                                "version ({0} {1}) or a suitable redirected version was not found on this " +
-                                "system.  The build cannot continue.", targetFrameworksSeen.First(),
-                                targetFrameworkVersionsSeen.Max(f => f)));
+                                "version or a suitable redirected version was not found on this " +
+                                "system.  The build cannot continue.  Project framework versions: {0}",
+                                String.Join(", ", targetFrameworksSeen.Select(f => f.Item1 + " " + f.Item2))));
 
-                        this.ReportWarning("BE0007", "A project with a different or higher framework version " +
-                            "was found.  Changing project FrameworkVersion property from '{0}' to '{1}' for " +
-                            "the build.", project.FrameworkVersion, projectFramework.Title);
+                        if(frameworkReflectionData.Platform != PlatformType.DotNetStandard)
+                            this.ReportWarning("BE0007", "A project with a different or higher framework version " +
+                                "was found.  Changing project FrameworkVersion property from '{0}' to '{1}' for " +
+                                "the build.", project.FrameworkVersion, projectFramework.Title);
 
                         project.FrameworkVersion = projectFramework.Title;
                         frameworkReflectionData = projectFramework;
@@ -2423,8 +2456,8 @@ AllDone:
             }
 
             if(commentsFiles.Count == 0)
-                this.ReportWarning("BE0062", "No XML comments files found.  The help file will not contain " +
-                    "any member comments.");
+                this.ReportWarning("BE0062", "No documentation source XML comments files found.  The help " +
+                    "file will not contain any member comments.");
 
             this.ExecutePlugIns(ExecutionBehaviors.After);
         }

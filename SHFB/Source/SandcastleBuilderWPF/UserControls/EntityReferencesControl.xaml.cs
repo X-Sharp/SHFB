@@ -2,8 +2,8 @@
 // System  : Sandcastle Help File Builder WPF Controls
 // File    : EntityReferencesControl.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/13/2015
-// Note    : Copyright 2011-2015, Eric Woodruff, All rights reserved
+// Updated : 11/14/2017
+// Note    : Copyright 2011-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the WPF user control used to look up code entity references, code snippets, tokens, images,
@@ -63,25 +63,6 @@ namespace SandcastleBuilder.WPF.UserControls
 
         #region Properties
         //=====================================================================
-
-        /// <summary>
-        /// This is used to enable or disable the animated GIF behavior
-        /// </summary>
-        /// <remarks>This is a hack to work around a problem when the control is hosted in a Windows
-        /// Forms application via a <c>HostElement</c>.  If set in the XAML, it causes an exception
-        /// related to the <c>CurrentFrameIndex</c> property already being registered.  By only enabling
-        /// it at runtime, it works around the problem.</remarks>
-        public bool AllowAnimatedGif
-        {
-            get
-            {
-                return Behaviors.SupportAnimatedGIFBehavior.GetSupportAnimatedGif(imgSpinner);
-            }
-            set
-            {
-                Behaviors.SupportAnimatedGIFBehavior.SetSupportAnimatedGif(imgSpinner, value);
-            }
-        }
 
         /// <summary>
         /// This is used to set or get the current project
@@ -661,10 +642,26 @@ namespace SandcastleBuilder.WPF.UserControls
 
             spIndexingPanel.Visibility = Visibility.Collapsed;
 
-            codeEntities = new List<string>(cache.AllKeys);
+            var allEntities = new HashSet<string>(cache.AllKeys);
+
+            // Add entries for all namespaces in the project namespace summaries
+            foreach(var ns in currentProject.NamespaceSummaries.Where(n => n.IsDocumented))
+            {
+                string name;
+
+                if(!ns.IsGroup)
+                    name = "N:" + ns.Name;
+                else
+                    name = "G:" + ns.Name.Replace(" (Group)", String.Empty);
+
+                if(!allEntities.Contains(name))
+                    allEntities.Add(name);
+            }
 
             // Add an entry for the root namespace container
-            codeEntities.Add("R:Project_" + currentProject.HtmlHelpName.Replace(" ", "_"));
+            allEntities.Add("R:Project_" + currentProject.HtmlHelpName.Replace(" ", "_"));
+
+            codeEntities = new List<string>(allEntities);
 
             if(cboEntityType.SelectedIndex == (int)EntityType.CodeEntity)
             {

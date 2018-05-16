@@ -6,9 +6,13 @@
 			This schema defines common inline elements.
 		</documentation>
 	</annotation>
-	<!-- include and import declarations -->
+
+  <!-- include and import declarations -->
 	<include schemaLocation="base.xsd" />
-	<!-- element declarations -->
+  <!-- Sandcastle fix, required for missing maml:inlineType -->
+  <include schemaLocation="inline.xsd"/>
+
+  <!-- element declarations -->
 	<!-- language markup -->
 	<element name="quoteInline" type="maml:textType">
 		<annotation>
@@ -334,6 +338,12 @@
 		</annotation>
 	</element>
 
+	<element name="lineBreak" type="maml:emptyType">
+		<annotation>
+			<documentation>Identifies a line break (carriage return) within a body of text, without breaking the paragraph.</documentation>
+		</annotation>
+	</element>
+
 	<!-- group declarations -->
 	<group name="inlineCommonGroup">
 		<annotation>
@@ -359,6 +369,7 @@
 			<element ref="maml:dynamicLink"/>
 			<element ref="maml:localizedText"/>
 			<element ref="maml:embeddedLabel"/>
+			<element ref="maml:lineBreak"/>
 		</choice>
 	</group>
 </schema>

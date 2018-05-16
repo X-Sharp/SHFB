@@ -20,6 +20,7 @@
 	<!-- header and footer -->
 	<item id="header"><span class="introStyle"></span></item>
 	<item id="footer_text"></item>
+	<item id="websiteAdContent" />
 
 	<!-- freshness date -->
 	<item id="boilerplate_UpdateTitle"><span class="introStyle">Mise à jour: {0}</span></item>
@@ -79,6 +80,7 @@
 	<item id="inline_dynamicLink_separatorText"> et </item>
   
 	<!-- Development language and code snippet titles for languages without a syntax generator -->
+	<item id="devlang_batch">Batch Script</item>
 	<item id="devlang_HTML">HTML</item>
 	<item id="devlang_PShell">PowerShell</item>
 	<item id="devlang_Python">Python</item>
@@ -90,6 +92,7 @@
 	<item id="noCodeExample"><p>Il n'y a pas d'exemple de code disponible actuellement ou le langage n'est pas supporté.</p></item>
 
 	<!-- Development language metadata values for languages without a syntax generator -->
+	<item id="metaLang_batch">Batch Script</item>
 	<item id="metaLang_HTML">HTML</item>
 	<item id="metaLang_PShell">PowerShell</item>
 	<item id="metaLang_Python">Python</item>

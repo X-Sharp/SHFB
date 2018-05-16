@@ -31,6 +31,7 @@
 		<language from="powershell" to="pshell"/>
 		<language from="ps1" to="pshell"/>
 		<language from="py" to="python" />
+		<language from="batch" to="bat" />
 	</map>
 	<!-- families of keywords -->
 	<keywordlists>
@@ -952,6 +953,57 @@
 			<kw>with</kw>
 			<kw>yield</kw>
 		</keywordlist>
+		<!-- MS-DOS batch file keywords -->
+		<keywordlist id="kwbatch-keywords">
+			<kw>ASSIGN</kw>
+			<kw>ATTRIB</kw>
+			<kw>CALL</kw>
+			<kw>CD</kw>
+			<kw>CHDIR</kw>
+			<kw>CHOICE</kw>
+			<kw>CLS</kw>
+			<kw>COM1</kw>
+			<kw>COMMAND</kw>
+			<kw>COMP</kw>
+			<kw>CON</kw>
+			<kw>COPY</kw>
+			<kw>DEL</kw>
+			<kw>DELTREE</kw>
+			<kw>DIR</kw>
+			<kw>DO</kw>
+			<kw>ENDLOCAL</kw>
+			<kw>ERASE</kw>
+			<kw>ERRORLEVEL</kw>
+			<kw>EXIST</kw>
+			<kw>EXIT</kw>
+			<kw>FC</kw>
+			<kw>FIND</kw>
+			<kw>FOR</kw>
+			<kw>GOTO</kw>
+			<kw>IF</kw>
+			<kw>IN</kw>
+			<kw>LPT1</kw>
+			<kw>MD</kw>
+			<kw>MKDIR</kw>
+			<kw>MORE</kw>
+			<kw>MOVE</kw>
+			<kw>NOT</kw>
+			<kw>NUL</kw>
+			<kw>OFF</kw>
+			<kw>PATH</kw>
+			<kw>PAUSE</kw>
+			<kw>PRN</kw>
+			<kw>RD</kw>
+			<kw>REN</kw>
+			<kw>RENAME</kw>
+			<kw>RMDIR</kw>
+			<kw>SGN</kw>
+			<kw>SHIFT</kw>
+			<kw>SORT</kw>
+			<kw>TIME</kw>
+			<kw>TYPE</kw>
+			<kw>XCOPY</kw>
+		</keywordlist>
 	</keywordlists>
 	<!-- Languages syntax specification -->
 	<languages>
@@ -1106,7 +1158,6 @@
 				</context>
 			</contexts>
 		</language>
-
 		<!-- VB.NET -->
 		<language id="vbnet" not-case-sensitive="yes" tabSize="4" name="VB.NET">
 			<contexts default="code">
@@ -1259,7 +1310,7 @@
 				</context>
 			</contexts>
 		</language>
-		<!-- XML -->
+		<!-- XML - Catch-all for any XML type -->
 		<language id="xml" tabSize="2" name="XML">
 			<contexts default="value">
 				<!-- Value context -->
@@ -1328,8 +1379,66 @@
 				</context>
 			</contexts>
 		</language>
-		<!-- XAML -->
+		<!-- XAML - Extensible Application Markup Language (WPF and things like it) -->
 		<language id="xaml" tabSize="2" name="XAML">
+			<contexts default="value">
+				<!-- Value context -->
+				<context id="value" attribute="xml-value">
+					<!-- Comment -->
+					<regexp id="rx-xml-comment" attribute="xml-comment" context="value" expression="&lt;!--(.|\n)*?--&gt;" />
+					<!-- cdata -->
+					<regexp id="rx-hidden" attribute="hidden" context="cdata" expression="&lt;!\[CDATA\[" />
+					<!-- A doctype of some sort-->
+					<regexp id="rx-doctype" attribute="xml-bracket" context="doctype" expression="&lt;!" />
+					<!-- closing element -->
+					<regexp id="rx-close-elem" attribute="xml-bracket" context="closing-element" expression="&lt;/" />
+					<!-- opening element -->
+					<regexp id="rx-open-elem" attribute="xml-bracket" context="opening-element" expression="&lt;\?{0,1}" />
+					<!-- Leftover end bracket from doctype -->
+					<regexp id="rx-end-bracket" attribute="xml-bracket" context="value" expression="&gt;" />
+				</context>
+				<!-- cdata tag -->
+				<context id="cdata" attribute="xml-cdata">
+					<regexp id="rx-hidden" attribute="hidden" context="value" expression="\]\]&gt;" />
+				</context>
+				<!-- A doctype of some sort -->
+				<context id="doctype" attribute="xml-code">
+					<regexp id="rx-doc-bracket" attribute="xml-bracket" context="value" expression="&gt;" />
+					<!-- Comment -->
+					<regexp id="rx-doc-comment" attribute="xml-comment" context="doctype" expression="&lt;!--(.|\n)*?--&gt;" />
+					<!-- A quoted string or attribute name -->
+					<regexp id="rx-doc-quote" attribute="xml-attribute-value" context="doctype" expression="(&quot;(.|[\r\n])*?&quot;|&apos;(.|[\r\n])*?&apos;|\b(\w|-|\.)+\b)" />
+					<!-- A doctype of some sort-->
+					<regexp id="rx-doc-nested" attribute="xml-bracket" context="doctype" expression="&lt;!" />
+				</context>
+				<!-- opening element context -->
+				<context id="opening-element" attribute="xml-code">
+					<!-- find tag... -->
+					<regexp id="rx-attr" attribute="xml-tag" context="element-attributes" expression="\b((\w|-|\.)+\:){0,1}(\w|-|\.)+\b" />
+				</context>
+				<!-- closing element -->
+				<context id="closing-element" attribute="xml-code">
+					<regexp id="rx-closing-elem" attribute="xml-tag" context="closing-element" expression="\b((\w|-|\.)+\:){0,1}(\w|-|\.)+\b" />
+					<regexp id="rx-value" attribute="xml-bracket" context="value" expression="(\?|/){0,1}&gt;" />
+				</context>
+				<!-- attributes group -->
+				<context id="element-attributes" attribute="xml-code">
+					<!-- find end of element -->
+					<regexp id="rx-value" attribute="xml-bracket" context="value" expression="(\?|/){0,1}&gt;" />
+					<!-- find attributes... -->
+					<regexp id="rx-attr-name" attribute="xml-attribute-name" context="attribute-name" expression="\b((\w|-|\.)+\:){0,1}(\w|-|\.)+\b" />
+				</context>
+				<!-- attribute name -->
+				<context id="attribute-name" attribute="hidden">
+					<regexp id="rx-elem-attrs" attribute="xml-attribute-value" context="element-attributes" expression="(&quot;(.|[\r\n])*?&quot;|&apos;(.|[\r\n])*?&apos;|\b(\w|-|\.)+\b)" />
+					<!-- This must come last as equals can appear in quoted strings -->
+					<regexp id="rx-elem-equal" attribute="xml-attribute-equal" context="attribute-name" expression="=" />
+				</context>
+			</contexts>
+		</language>
+		<!-- AXML - Android Extensible Markup Language.  Like XAML but Android-specific and different enough it gets
+				 its own set of rules to allow for a different code block title. -->
+		<language id="axml" tabSize="2" name="AXML">
 			<contexts default="value">
 				<!-- Value context -->
 				<context id="value" attribute="xml-value">
@@ -1461,6 +1570,44 @@
 				<!-- line comment // ... -->
 				<context id="linecomment" attribute="cpp-linecomment">
 					<!-- finish line of comment end of line -->
+					<linecontinue attribute="hidden" context="code" />
+				</context>
+			</contexts>
+		</language>
+		<!-- MS-DOS batch script language specification -->
+		<language id="bat" not-case-sensitive="yes" tabSize="4" name="Batch Script">
+			<!-- Code contexts: default (most common) is code. -->
+			<contexts default="code">
+				<!-- Basic source code context -->
+				<context id="code" attribute="code">
+					<!-- " " literals -->
+					<regexp id="dqliteral" attribute="literal" context="code" expression="&quot;.*?&quot;" />
+					<!-- ' ' literals -->
+					<regexp id="sqliteral" attribute="literal" context="code" expression="&apos;.*?&apos;" />
+					<!-- Variable -->
+					<regexp id="variable" attribute="preprocessor" context="code" expression="%[A-Za-z0-9_(){}\[\]$*+\-#,;.@!?]+%|%%[A-Za-z0-9_(){}\[\]$*+\-#,;.@!?]+" />
+					<!-- Numbers -->
+					<regexp id="number" attribute="number" context="code" expression="0x[0-9a-fA-F]*|(((?&lt;=[^0-9])(\+|-))?)\b[0-9][0-9]*(\.[0-9]+)?" />
+					<!-- Whole line statements.  These look a bit odd if not handled as a whole line as it may colorize
+						   parts of the displayed text or the comment.  A similar thing can happen for SET as well. -->
+					<regexp id="comment-line" attribute="keyword" context="comment-line-statement" expression="REM|ECHO OFF|ECHO|::" />
+					<regexp id="kw-line" attribute="keyword" context="line-statement" expression="SETLOCAL|SET" />
+					<!-- Keyword batch script -->
+					<keyword attribute="keyword" context="code" family="kwbatch-keywords" />
+				</context>
+				<context id="comment-line-statement" attribute="comment">
+					<linecontinue attribute="hidden" context="code" />
+				</context>
+				<!-- This isn't an XML attribute equal sign but it's got the appropriate color -->
+				<context id="line-statement" attribute="xml-attribute-equal">
+					<!-- " " literals -->
+					<regexp id="dqliteral" attribute="literal" context="line-statement" expression="&quot;.*?&quot;" />
+					<!-- ' ' literals -->
+					<regexp id="sqliteral" attribute="literal" context="line-statement" expression="&apos;.*?&apos;" />
+					<!-- Variable -->
+					<regexp id="variable" attribute="preprocessor" context="code" expression="%[A-Za-z0-9_(){}\[\]$*+\-#,;.@!?]+%|%%[A-Za-z0-9_(){}\[\]$*+\-#,;.@!?]+" />
+					<!-- End of line comment -->
+					<regexp id="endcomment" attribute="comment" context="code" expression="::.*$" />
 					<linecontinue attribute="hidden" context="code" />
 				</context>
 			</contexts>

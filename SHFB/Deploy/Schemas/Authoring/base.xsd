@@ -16,9 +16,12 @@
 		</documentation>
 	</annotation>
 
-	<import schemaLocation="../xlink.xsd" namespace="http://www.w3.org/1999/xlink" />
+  <!-- Sandcastle fix, xlink schema already exists in VisualStudio schema catalog,
+       so only import has to be done without schema location -->
+  <!--<import schemaLocation="../xlink.xsd" namespace="http://www.w3.org/1999/xlink" />-->
+  <import namespace="http://www.w3.org/1999/xlink" />
 
-	<!-- simpleType declarations -->
+  <!-- simpleType declarations -->
 	<simpleType name="mediaFileFormatsType">
 		<annotation>
 			<documentation>
@@ -117,12 +120,10 @@
 			<enumeration value="jsharp" />
 			<enumeration value="ecmascript" />
 			<enumeration value="javascript" />
-			<enumeration value="js" />
 			<enumeration value="jscriptnet" />
 			<enumeration value="jscript.net" />
 			<enumeration value="vbnet" />
 			<enumeration value="vb.net" />
-			<enumeration value="vb#" />
 			<enumeration value="htm" />
 			<enumeration value="aspnet" />
 			<enumeration value="asp.net" />
@@ -138,6 +139,8 @@
 			<enumeration value="python" />
 			<enumeration value="ruby" />
 			<enumeration value="pascal" />
+			<enumeration value="bat" />
+			<enumeration value="batch" />
 			<enumeration value="none" />
 		</restriction>
 	</simpleType>

@@ -2,8 +2,8 @@
 // System  : Sandcastle Help File Builder Visual Studio Package
 // File    : SandcastleBuilderPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/26/2015
-// Note    : Copyright 2011-2015, Eric Woodruff, All rights reserved
+// Updated : 03/26/2018
+// Note    : Copyright 2011-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class that defines the Sandcastle Help File Builder Visual Studio package
@@ -41,12 +41,13 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 using Sandcastle.Core;
 
-using SandcastleBuilder.MicrosoftHelpViewer;
 using SandcastleBuilder.Package.Editors;
 using SandcastleBuilder.Package.Nodes;
 using SandcastleBuilder.Package.PropertyPages;
 using SandcastleBuilder.Package.ToolWindows;
 using SandcastleBuilder.Utils;
+using SandcastleBuilder.WPF.PropertyPages;
+using SandcastleBuilder.WPF.UI;
 using SHFBUtility = SandcastleBuilder.Utils.Utility;
 
 namespace SandcastleBuilder.Package
@@ -219,12 +220,13 @@ namespace SandcastleBuilder.Package
             Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for {0}",
                 this.ToString()));
 
-            // Ensure that the file and folder path user controls are known by the base property page class
-            if(!BasePropertyPage.CustomControls.ContainsKey(typeof(SandcastleBuilder.Utils.Controls.FilePathUserControl).Name))
+            // Ensure that the custom controls are known by the base property page class
+            if(!BasePropertyPage.CustomControls.ContainsKey("SandcastleBuilder.WPF.PropertyPages.FilePathUserControl"))
             {
-                BasePropertyPage.CustomControls.Add(typeof(SandcastleBuilder.Utils.Controls.FilePathUserControl).FullName,
+                BasePropertyPage.CustomControls.Add("Xceed.Wpf.Toolkit.IntegerUpDown", "Value");
+                BasePropertyPage.CustomControls.Add("SandcastleBuilder.WPF.PropertyPages.FilePathUserControl",
                     "PersistablePath");
-                BasePropertyPage.CustomControls.Add(typeof(SandcastleBuilder.Utils.Controls.FolderPathUserControl).FullName,
+                BasePropertyPage.CustomControls.Add("SandcastleBuilder.WPF.PropertyPages.FolderPathUserControl",
                     "PersistablePath");
             }
         }
@@ -344,12 +346,28 @@ namespace SandcastleBuilder.Package
             // Register for solution events so that we can clear the component cache when necessary
             var dte = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(DTE)) as DTE;
 
-            if(dte != null && dte.Events != null)
+            if(dte != null)
             {
-                solutionEvents = dte.Events.SolutionEvents;
+                if(dte.Events != null)
+                {
+                    solutionEvents = dte.Events.SolutionEvents;
 
-                if(solutionEvents != null)
-                    solutionEvents.AfterClosing += solutionEvents_AfterClosing;
+                    if(solutionEvents != null)
+                        solutionEvents.AfterClosing += solutionEvents_AfterClosing;
+                }
+
+                try
+                {
+                    // Set the owning window for WPF modal dialogs to the main Visual Studio window
+                    Sandcastle.Core.WpfHelpers.MainWindowHandle = new IntPtr(dte.MainWindow.HWnd);
+                }
+                catch
+                {
+                    // Ignore exceptions.  There is no main window when invoked for a command line build.
+                    // It may also try to load the package before the main window is available if tool windows
+                    // were left open.  Worst case, modal dialogs may not appear over the main form on dual
+                    // monitor systems.
+                }
             }
         }
 
@@ -453,11 +471,10 @@ namespace SandcastleBuilder.Package
                                 var options = this.GeneralOptions;
 
                                 if(options != null)
-                                    using(LaunchMSHelpViewerDlg dlg = new LaunchMSHelpViewerDlg(project,
-                                        options.MSHelpViewerPath))
-                                    {
-                                        dlg.ShowDialog();
-                                    }
+                                {
+                                    var dlg = new LaunchMSHelpViewerDlg(project, options.MSHelpViewerPath);
+                                    dlg.ShowModalDialog();
+                                }
                             }
             }
         }
@@ -649,10 +666,10 @@ namespace SandcastleBuilder.Package
             var options = this.GeneralOptions;
 
             if(project != null && options != null)
-                using(LaunchMSHelpViewerDlg dlg = new LaunchMSHelpViewerDlg(project, options.MSHelpViewerPath))
-                {
-                    dlg.ShowDialog();
-                }
+            {
+                var dlg = new LaunchMSHelpViewerDlg(project, options.MSHelpViewerPath);
+                dlg.ShowModalDialog();
+            }
         }
 
         /// <summary>

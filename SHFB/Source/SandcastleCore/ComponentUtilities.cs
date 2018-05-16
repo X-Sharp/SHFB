@@ -2,8 +2,8 @@
 // System  : Sandcastle Tools - Sandcastle Tools Core Class Library
 // File    : ComponentUtilities.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/26/2015
-// Note    : Copyright 2007-2015, Eric Woodruff, All rights reserved
+// Updated : 12/03/2017
+// Note    : Copyright 2007-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class containing properties and methods used to locate and work with build components,
@@ -58,6 +58,7 @@ namespace Sandcastle.Core
         private static string toolsFolder, componentsFolder;
 
         private static Regex reSyntaxSplitter = new Regex(",\\s*");
+        private static List<CultureInfo> supportedLanguages;
 
         #endregion
 
@@ -96,9 +97,36 @@ namespace Sandcastle.Core
         /// </summary>
         /// <value>This returns "Standard" to add the standard C#, VB.NET and C++ syntax filter to each API
         /// topic.</value>
-        public static string DefaultSyntaxFilter
+        public static string DefaultSyntaxFilter => "Standard";
+
+        /// <summary>
+        /// This read-only property returns a list of languages supported by the help file builder presentation
+        /// styles.
+        /// </summary>
+        /// <value>The available language resources are determined by seeing what stop word list translations are
+        /// available.</value>
+        public static IEnumerable<CultureInfo> SupportedLanguages
         {
-            get { return "Standard"; }
+            get
+            {
+                if(supportedLanguages == null)
+                {
+                    string name = Path.Combine(ComponentUtilities.ToolsFolder, @"PresentationStyles\Shared\StopWordList");
+
+                    try
+                    {
+                        supportedLanguages = Directory.EnumerateFiles(name, "*.txt").Select(
+                            f => new CultureInfo(Path.GetFileNameWithoutExtension(f))).OrderBy(c => c.DisplayName).ToList();
+                    }
+                    catch
+                    {
+                        // Ignore any errors, just return a default list with the en-US language
+                        supportedLanguages = new List<CultureInfo> { new CultureInfo("en-US") };
+                    }
+                }
+
+                return supportedLanguages;
+            }
         }
         #endregion
 
@@ -262,10 +290,20 @@ namespace Sandcastle.Core
                             catalog.Catalogs.Add(asmCat);
                         else
                             asmCat.Dispose();
+
+                    }   // Ignore the errors we may expect to see but log them for debugging purposes
+                    catch(ArgumentException ex)
+                    {
+                        // These can occur if it tries to load a foreign framework assembly (i.e. .NETStandard)
+                        // In this case, the inner exception will be the bad image format exception.  If not,
+                        // report the issue.
+                        if(!(ex.InnerException is BadImageFormatException))
+                            throw;
+
+                        System.Diagnostics.Debug.WriteLine(ex);
                     }
                     catch(FileNotFoundException ex)
                     {
-                        // Ignore the errors we may expect to see but log them for debugging purposes
                         System.Diagnostics.Debug.WriteLine(ex);
                     }
                     catch(FileLoadException ex)

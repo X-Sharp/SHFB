@@ -562,7 +562,7 @@
 			</xsl:variable>
 			<xsl:if test="normalize-space($v_devlang)!=''">
 				<MSHelp:Attr Name="DevLang">
-					<includeAttribute name="Value" item="metaLang_{$v_devlang}"/>
+					<includeAttribute name="Value" item="metaLang_{$v_devlang}" undefined="{$v_devlang}"/>
 				</MSHelp:Attr>
 			</xsl:if>
 		</xsl:for-each>
@@ -595,7 +595,7 @@
 					<xsl:when test="contains($languagesList,concat($v_devlang,';'))"/>
 					<xsl:otherwise>
 						<MSHelp:Attr Name="DevLang">
-							<includeAttribute name="Value" item="metaLang_{$v_devlang}"/>
+							<includeAttribute name="Value" item="metaLang_{$v_devlang}" undefined="{$v_devlang}"/>
 						</MSHelp:Attr>
 					</xsl:otherwise>
 				</xsl:choose>
@@ -631,7 +631,7 @@
 					<xsl:when test="contains($languagesList2,concat($v_devlang,';'))"/>
 					<xsl:otherwise>
 						<MSHelp:Attr Name="DevLang">
-							<includeAttribute name="Value" item="metaLang_{$v_devlang}"/>
+							<includeAttribute name="Value" item="metaLang_{$v_devlang}" undefined="{$v_devlang}"/>
 						</MSHelp:Attr>
 					</xsl:otherwise>
 				</xsl:choose>
@@ -706,21 +706,6 @@
 									<xsl:value-of select="$v_namespace"/>
 									<xsl:text>.</xsl:text>
 									<xsl:copy-of select="." />
-								</parameter>
-							</includeAttribute>
-						</MSHelp:Keyword>
-					</xsl:if>
-					<!-- multi-topic types (not delegates and enumerations) get about entries, too-->
-					<xsl:if test="$g_apiSubGroup='class' or $g_apiSubGroup='structure' or $g_apiSubGroup='interface'">
-						<MSHelp:Keyword Index="K">
-							<includeAttribute name="Term"
-																item="indexEntry_aboutType">
-								<parameter>
-									<include item="indexEntry_{$g_apiSubGroup}">
-										<parameter>
-											<xsl:copy-of select="."/>
-										</parameter>
-									</include>
 								</parameter>
 							</includeAttribute>
 						</MSHelp:Keyword>

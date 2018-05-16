@@ -2,15 +2,15 @@
 // System  : Sandcastle Help File Builder Components
 // File    : CodeBlockComponent.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/15/2016
-// Note    : Copyright 2006-2016, Eric Woodruff, All rights reserved
+// Updated : 12/20/2017
+// Note    : Copyright 2006-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a build component that is used to search for <code> XML comment tags and colorize the code
 // within them.  It can also include code from an external file or a region within the file.
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
-// distributed with the code and can be found at the project website: https://GitHub.com/EWSoftware/SHFB.   This
+// distributed with the code and can be found at the project website: https://GitHub.com/EWSoftware/SHFB.  This
 // notice, the author's name, and all copyright notices must remain intact in all applications, documentation,
 // and source files.
 //
@@ -49,17 +49,17 @@ using System.IO;
 using System.Globalization;
 using System.Net;
 using System.Reflection;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XPath;
 
-using Sandcastle.Core.BuildAssembler;
-using Sandcastle.Core.BuildAssembler.BuildComponent;
+using ColorizerLibrary;
 
 using Microsoft.Ddue.Tools.BuildComponent;
 
-using ColorizerLibrary;
+using Sandcastle.Core;
+using Sandcastle.Core.BuildAssembler;
+using Sandcastle.Core.BuildAssembler.BuildComponent;
 
 using SandcastleBuilder.Components.UI;
 
@@ -187,11 +187,8 @@ namespace SandcastleBuilder.Components
             }
 
             /// <inheritdoc />
-            public override string DefaultConfiguration
-            {
-                get
-                {
-                    return @"<!-- Base path for relative filenames in source attributes (optional) -->
+            public override string DefaultConfiguration =>
+@"<!-- Base path for relative filenames in source attributes (optional) -->
 <basePath value=""{@HtmlEncProjectFolder}"" />
 
 <!-- Base output paths for the files (required).  These should match the parent folder of the output path
@@ -227,17 +224,14 @@ namespace SandcastleBuilder.Components
 	scriptFile=""{@SHFBFolder}PresentationStyles\Colorizer\highlight.js""
 	disabled=""{@DisableCodeBlockComponent}"" language=""cs"" numberLines=""false"" outlining=""false""
 	keepSeeTags=""false"" tabSize=""0"" defaultTitle=""true"" />";
-                }
-            }
 
             /// <inheritdoc />
             public override string ConfigureComponent(string currentConfiguration, CompositionContainer container)
             {
-                using(CodeBlockConfigDlg dlg = new CodeBlockConfigDlg(currentConfiguration))
-                {
-                    if(dlg.ShowDialog() == DialogResult.OK)
-                        currentConfiguration = dlg.Configuration;
-                }
+                var dlg = new CodeBlockConfigDlg(currentConfiguration);
+
+                if(dlg.ShowModalDialog() ?? false)
+                    currentConfiguration = dlg.Configuration;
 
                 return currentConfiguration;
             }
@@ -516,9 +510,15 @@ namespace SandcastleBuilder.Components
             }
 
             // Initialize the code colorizer
-            colorizer = new CodeColorizer(syntaxFile, styleFile);
-            colorizer.UseDefaultTitle = useDefaultTitle;
-            colorizer.TabSize = defaultTabSize;
+            colorizer = new CodeColorizer(syntaxFile, styleFile)
+            {
+                UseDefaultTitle = useDefaultTitle,
+                TabSize = defaultTabSize
+            };
+
+            // Share the language ID mappings so that other components like the Syntax Component can get titles
+            // for languages it doesn't know about.
+            BuildComponentCore.Data["LanguageIds"] = colorizer.FriendlyNames;
 
             // Create the XPath queries
             var context = new CustomContext();
@@ -898,6 +898,11 @@ namespace SandcastleBuilder.Components
                 if(codeBlock.EndsWith("/*", StringComparison.Ordinal) ||
                   codeBlock.EndsWith("--", StringComparison.Ordinal))
                     codeBlock = codeBlock.Substring(0, codeBlock.Length - 2);
+
+                // Batch file remark
+                if(codeBlock.EndsWith("REM", StringComparison.OrdinalIgnoreCase) && codeBlock.Length > 3 &&
+                  (codeBlock[codeBlock.Length - 4] == '\r' || codeBlock[codeBlock.Length - 4] == '\n'))
+                    codeBlock = codeBlock.Substring(0, codeBlock.Length - 3);
             }
 
             if(code.Attributes["removeRegionMarkers"] != null &&

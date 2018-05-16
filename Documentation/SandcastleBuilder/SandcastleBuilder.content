@@ -225,18 +225,15 @@
         <HelpKeyword index="K" term="property categories, Help File" />
       </HelpKeywords>
     </Topic>
-    <Topic id="7d28bf8f-923f-44c1-83e1-337a416947a1" visible="True" title="HTML Help 1 Category Properties">
+    <Topic id="7d28bf8f-923f-44c1-83e1-337a416947a1" visible="True" title="Help 1/Website Category Properties">
       <HelpKeywords>
         <HelpKeyword index="K" term="properties, BinaryTOC" />
         <HelpKeyword index="K" term="properties, HtmlSdkLinkType" />
         <HelpKeyword index="K" term="properties, IncludeFavorites" />
         <HelpKeyword index="K" term="property categories, HTML Help 1" />
-      </HelpKeywords>
-    </Topic>
-    <Topic id="f818e4d1-3457-4be6-a833-1b700f1e2f18" visible="True" title="Website Category Properties">
-      <HelpKeywords>
-        <HelpKeyword index="K" term="properties, WebsiteSdkLinkType" />
-        <HelpKeyword index="K" term="property categories, Website" />
+        <HelpKeyword index="K" term="property categories, website" />
+        <HelpKeyword index="K" term="property categories, markdown" />
+        <HelpKeyword index="K" term="property categories, Open XML" />
       </HelpKeywords>
     </Topic>
     <Topic id="5f743a6e-3239-409a-a8c1-0bff4b5375f4" visible="True" title="MS Help Viewer Category Properties">
@@ -1385,7 +1382,22 @@
       <HelpKeyword index="K" term="History" />
       <HelpKeyword index="K" term="Version History" />
     </HelpKeywords>
-    <Topic id="8b636153-2500-4e63-b372-a1595456c3a6" visible="True" isSelected="true" title="Version 2017.1.28.0">
+    <Topic id="3ca9bf44-db1d-45f7-833c-a046d724da1e" visible="True" isSelected="true" title="Version 2017.12.30.2">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2017.12.30.2" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="8479cf1a-4f4f-4f0b-89f7-85a04cd78d16" visible="True" title="Version 2017.12.30.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2017.12.30.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="63e7d1c3-6706-444b-aa02-5defd7d1da60" visible="True" title="Version 2017.5.15.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2017.5.15.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="8b636153-2500-4e63-b372-a1595456c3a6" visible="True" title="Version 2017.1.28.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="version, 2017.1.28.0" />
       </HelpKeywords>

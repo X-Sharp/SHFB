@@ -4,7 +4,7 @@
 	<pathOffset location="..\..\..\..\..\Deployment" />
 
 	<!-- This indicates the version of Sandcastle with which this installer is associated.-->
-	<sandcastle version="v2017.1.28.0" />
+	<sandcastle version="v2017.5.15.0" />
 
 	<!-- Define the installer pages.  Third-party build tool and component providers can add new pages that
 			 they have created to install their own products as well. -->
@@ -15,8 +15,8 @@
 				 executing installer. -->
 		<page type="Sandcastle.Installer.InstallerPages.WelcomePage" />
 		<page type="Sandcastle.Installer.InstallerPages.WhatsNewPage">
-			<whatsNew url="http://EWSoftware.github.io/SHFB/html/8b636153-2500-4e63-b372-a1595456c3a6.htm"
-				description="Sandcastle Help File Builder and Tools v2017.1.28.0 Release Notes" />
+			<whatsNew url="http://EWSoftware.github.io/SHFB/html/63e7d1c3-6706-444b-aa02-5defd7d1da60.htm"
+				description="Sandcastle Help File Builder and Tools v2017.5.15.0 Release Notes" />
 		</page>
 		<page type="Sandcastle.Installer.InstallerPages.RequiredFrameworkPage" />
 		<page type="Sandcastle.Installer.InstallerPages.HelpFileFormatsPage">
@@ -25,7 +25,7 @@
 
 		<!-- Sandcastle Help File Builder and Tools installer pages -->
 		<page type="Sandcastle.Installer.InstallerPages.SandcastleHelpFileBuilderPage"
-			frameworkVersion="4.5" shfbVersion="2017.1.28.0" installerName="SandcastleHelpFileBuilder.msi"/>
+			frameworkVersion="4.5" shfbVersion="2017.5.15.0" installerName="SandcastleHelpFileBuilder.msi"/>
 		<page type="Sandcastle.Installer.InstallerPages.SHFBVisualStudioPackagePage"
 			frameworkVersion="4.5" packageGuid="c997d569-ee8e-4947-a46f-9a0717ce39a0">
 			<!-- These paths can be adjusted if you installed Visual Studio in a non-standard location.  They must
@@ -33,7 +33,7 @@
 			<package name="SHFBVisualStudioPackage_VS2015AndLater.vsix" description="Visual Studio 2015;Visual Studio 2017">
 				<visualStudio version="14.0" basePath="%VS140COMNTOOLS%\..\IDE" />
 				<visualStudio version="15.0" basePath="%ProgramFiles(x86)%\Microsoft Visual Studio\2017\{0}\Common7\IDE"
-					editionPaths="Community, Developer, Enterprise" />
+					editionPaths="Community, Professional, Enterprise" />
 			</package>
 		</page>
 
@@ -41,7 +41,7 @@
 			<!-- These paths can be adjusted if you installed Visual Studio in a non-standard location -->
 			<visualStudio version="Visual Studio 2015" location="%VS140COMNTOOLS%\..\..\Xml\Schemas" />
 			<visualStudio version="Visual Studio 2017 Community" location="%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Community\Xml\Schemas" />
-			<visualStudio version="Visual Studio 2017 Developer" location="%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Developer\Xml\Schemas" />
+			<visualStudio version="Visual Studio 2017 Professional" location="%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Professional\Xml\Schemas" />
 			<visualStudio version="Visual Studio 2017 Enterprise" location="%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Xml\Schemas" />
 		</page>
 		<page type="Sandcastle.Installer.InstallerPages.MamlSnippetsPage">
