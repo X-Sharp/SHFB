@@ -195,18 +195,18 @@
 	</xsl:template>
 
 	<!-- produces a C#/C++ style generic template parameter list for inclusion in the index -->
-	<xsl:template name="csTemplateText">
-		<xsl:text>%3C</xsl:text>
-		<xsl:call-template name="templateText" />
-		<xsl:text>%3E</xsl:text>
-	</xsl:template>
+  <xsl:template name="csTemplateText">
+    <xsl:text>&lt;</xsl:text>
+    <xsl:call-template name="templateText" />
+    <xsl:text>&gt;</xsl:text>
+  </xsl:template>
 
-	<!-- produces a VB-style generic template parameter list for inclusion in the index -->
+  <!-- produces a VB-style generic template parameter list for inclusion in the index
 	<xsl:template name="vbTemplateText">
 		<xsl:text>(Of </xsl:text>
 		<xsl:call-template name="templateText" />
 		<xsl:text>)</xsl:text>
-	</xsl:template>
+	</xsl:template> -->
 
 	<!-- produces a comma-separated list of generic template parameter names -->
 	<!-- comma character is URL-encoded so as not to create sub-index entries -->
@@ -226,10 +226,10 @@
 			<xsl:value-of select="$name" />
 			<xsl:call-template name="csTemplateText" />
 		</name>
-		<name language="v">
+		<!--<name language="v">
 			<xsl:value-of select="$name" />
 			<xsl:call-template name="vbTemplateText" />
-		</name>
+		</name>-->
 	</xsl:template>
 
 	<xsl:template match="template" mode="index">
@@ -243,12 +243,12 @@
 			<xsl:if test="number(@rank) &gt; 1">,</xsl:if>
 			<xsl:text>]</xsl:text>
 		</name>
-		<name language="v">
+		<!--<name language="v">
 			<xsl:apply-templates select="type|arrayOf|pointerTo|referenceTo|template|specialization|templates" mode="index"/>
 			<xsl:text>(</xsl:text>
 			<xsl:if test="number(@rank) &gt; 1">,</xsl:if>
 			<xsl:text>)</xsl:text>
-		</name>
+		</name>-->
 	</xsl:template>
 
 	<xsl:template match="pointerTo" mode="index">

@@ -33,7 +33,16 @@
 	<item id="topicTitle_structure">{0} Structure</item>
 	<item id="topicTitle_interface">{0} Interface</item>
 	<item id="topicTitle_derivedTypeList">{0} Derived Classes</item>
-  
+
+	<!-- start of X# topic titles -->
+	<item id="topicTitle_functions">Functions</item>
+	<item id="topicTitle_function">Function {0}</item>
+	<item id="topicTitle_defines">Defines</item>
+	<item id="topicTitle_define">Define {0}</item>
+	<item id="topicTitle_globals">Globals</item>
+	<item id="topicTitle_global">Global {0}</item>
+	<!-- end of X# topic titles -->
+ 	
 	<item id="topicTitle_delegate">{0} Delegate</item>
 	<item id="topicTitle_enumeration">{0} Enumeration</item>
 	<item id="topicTitle_field">{0} Field</item>

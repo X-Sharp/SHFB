@@ -2351,6 +2351,7 @@
 	<xsl:template match="specialization" mode="link" name="t_specializationLink">
 		<span class="languageSpecificText">
 			<span class="cs">&lt;</span>
+      			<span class="xs">&lt;</span>
 			<span class="vb">
 				<xsl:text>(Of </xsl:text>
 			</span>
@@ -2366,6 +2367,7 @@
 		</xsl:for-each>
 		<span class="languageSpecificText">
 			<span class="cs">&gt;</span>
+      			<span class="xs">&gt;</span>
 			<span class="vb">)</span>
 			<span class="cpp">&gt;</span>
 			<span class="fs">&gt;</span>
@@ -2387,6 +2389,7 @@
 	<xsl:template match="specialization" mode="decorated" name="t_specializationDecorated">
 		<span class="languageSpecificText">
 			<span class="cs">&lt;</span>
+      <span class="xs">&lt;</span>
 			<span class="vb">
 				<xsl:text>(Of </xsl:text>
 			</span>
@@ -2402,6 +2405,7 @@
 		</xsl:for-each>
 		<span class="languageSpecificText">
 			<span class="cs">&gt;</span>
+      <span class="xs">&gt;</span>
 			<span class="vb">)</span>
 			<span class="cpp">&gt;</span>
 			<span class="fs">&gt;</span>
