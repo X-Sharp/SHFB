@@ -355,11 +355,13 @@ namespace Microsoft.Ddue.Tools
 
                 case "T:Vulcan.__VOFloat":
                 case "T:XSharp.__VOFloat":
+                case "T:XSharp.__Float":
                     writer.WriteKeyword("FLOAT");
                     break;
 
                 case "T:Vulcan.__VODate":
-                case "T:XSharp.__VODate": 
+                case "T:XSharp.__VODate":
+                case "T:XSharp.__Date":
                     writer.WriteKeyword("DATE");
                     break;
 
