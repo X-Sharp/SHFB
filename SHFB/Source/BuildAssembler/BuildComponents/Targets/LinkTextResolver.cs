@@ -399,6 +399,11 @@ namespace Microsoft.Ddue.Tools.Targets
             writer.WriteEndElement();
 
             writer.WriteStartElement("span");
+            writer.WriteAttributeString("class", "xs");
+            writer.WriteString("<");
+            writer.WriteEndElement();
+
+            writer.WriteStartElement("span");
             writer.WriteAttributeString("class", "vb");
             writer.WriteString("(Of ");
             writer.WriteEndElement();
@@ -431,6 +436,12 @@ namespace Microsoft.Ddue.Tools.Targets
             writer.WriteAttributeString("class", "languageSpecificText");
             writer.WriteStartElement("span");
             writer.WriteAttributeString("class", "cs");
+            writer.WriteString(">");
+            writer.WriteEndElement();
+
+
+            writer.WriteStartElement("span");
+            writer.WriteAttributeString("class", "xs");
             writer.WriteString(">");
             writer.WriteEndElement();
 
@@ -494,6 +505,11 @@ namespace Microsoft.Ddue.Tools.Targets
             writer.WriteEndElement();
 
             writer.WriteStartElement("span");
+            writer.WriteAttributeString("class", "xs");
+            writer.WriteString("<");
+            writer.WriteEndElement();
+
+            writer.WriteStartElement("span");
             writer.WriteAttributeString("class", "vb");
             writer.WriteString("(Of ");
             writer.WriteEndElement();
@@ -528,6 +544,11 @@ namespace Microsoft.Ddue.Tools.Targets
             writer.WriteAttributeString("class", "languageSpecificText");
             writer.WriteStartElement("span");
             writer.WriteAttributeString("class", "cs");
+            writer.WriteString(">");
+            writer.WriteEndElement();
+
+            writer.WriteStartElement("span");
+            writer.WriteAttributeString("class", "xs");
             writer.WriteString(">");
             writer.WriteEndElement();
 
@@ -591,6 +612,17 @@ namespace Microsoft.Ddue.Tools.Targets
             writer.WriteString("]");
             writer.WriteEndElement();
 
+            // X# array notation
+            writer.WriteStartElement("span");
+            writer.WriteAttributeString("class", "xs");
+            writer.WriteString("[");
+
+            for(int i = 1; i < reference.Rank; i++)
+                writer.WriteString(",");
+
+            writer.WriteString("]");
+            writer.WriteEndElement();
+
             // VB array notation
             writer.WriteStartElement("span");
             writer.WriteAttributeString("class", "vb");
@@ -634,6 +666,12 @@ namespace Microsoft.Ddue.Tools.Targets
             // C# separator
             writer.WriteStartElement("span");
             writer.WriteAttributeString("class", "cs");
+            writer.WriteString(".");
+            writer.WriteEndElement();
+
+            // X# separator
+            writer.WriteStartElement("span");
+            writer.WriteAttributeString("class", "xs");
             writer.WriteString(".");
             writer.WriteEndElement();
 
@@ -924,6 +962,11 @@ namespace Microsoft.Ddue.Tools.Targets
             writer.WriteEndElement();
 
             writer.WriteStartElement("span");
+            writer.WriteAttributeString("class", "xs");
+            writer.WriteString(target.Name);
+            writer.WriteEndElement();
+
+            writer.WriteStartElement("span");
             writer.WriteAttributeString("class", "vb");
             if(target.Name == "Explicit")
             {
@@ -987,6 +1030,11 @@ namespace Microsoft.Ddue.Tools.Targets
                 writer.WriteString("()");
                 writer.WriteEndElement();
 
+                writer.WriteStartElement("span");
+                writer.WriteAttributeString("class", "xs");
+                writer.WriteString("()");
+                writer.WriteEndElement();
+
                 // When there are no parameters, VB shows no parenthesis
                 writer.WriteStartElement("span");
                 writer.WriteAttributeString("class", "vb");
@@ -1041,6 +1089,11 @@ namespace Microsoft.Ddue.Tools.Targets
                 writer.WriteString("()");
                 writer.WriteEndElement();
 
+                writer.WriteStartElement("span");
+                writer.WriteAttributeString("class", "xs");
+                writer.WriteString("()");
+                writer.WriteEndElement();
+
                 // When there are no parameters, VB shows no parenthesis
                 writer.WriteStartElement("span");
                 writer.WriteAttributeString("class", "vb");
@@ -1084,6 +1137,11 @@ namespace Microsoft.Ddue.Tools.Targets
                     writer.WriteEndElement();
 
                     writer.WriteStartElement("span");
+                    writer.WriteAttributeString("class", "xs");
+                    writer.WriteString("[");
+                    writer.WriteEndElement();
+
+                    writer.WriteStartElement("span");
                     writer.WriteAttributeString("class", "vb");
                     writer.WriteString("(");
                     writer.WriteEndElement();
@@ -1119,6 +1177,11 @@ namespace Microsoft.Ddue.Tools.Targets
                     writer.WriteAttributeString("class", "languageSpecificText");
                     writer.WriteStartElement("span");
                     writer.WriteAttributeString("class", "cs");
+                    writer.WriteString("]");
+                    writer.WriteEndElement();
+
+                    writer.WriteStartElement("span");
+                    writer.WriteAttributeString("class", "xs");
                     writer.WriteString("]");
                     writer.WriteEndElement();
 

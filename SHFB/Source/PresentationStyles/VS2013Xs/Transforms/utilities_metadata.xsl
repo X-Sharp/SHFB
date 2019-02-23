@@ -134,7 +134,7 @@
 
 	<!-- produces an XML list of API names; context is parent of apidata element -->
 	<!-- if there are no templates: <name>Blah</name> -->
-	<!-- if there are templates: <name langauge="c">Blah<T></name><name language="v">Blah(Of T)</name> -->
+	<!-- if there are templates: <name language="c">Blah<T></name><name language="v">Blah(Of T)</name> -->
 	<xsl:template name="simpleTextNames">
 		<xsl:choose>
 			<xsl:when test="specialization">
@@ -200,13 +200,19 @@
     <xsl:call-template name="templateText" />
     <xsl:text>&gt;</xsl:text>
   </xsl:template>
-
-  <!-- produces a VB-style generic template parameter list for inclusion in the index
+	
+	<xsl:template name="xsTemplateText">
+		<xsl:text>&lt;</xsl:text>
+		<xsl:call-template name="templateText" />
+		<xsl:text>&gt;</xsl:text>
+	</xsl:template>
+	
+  <!-- produces a VB-style generic template parameter list for inclusion in the index -->
 	<xsl:template name="vbTemplateText">
 		<xsl:text>(Of </xsl:text>
 		<xsl:call-template name="templateText" />
 		<xsl:text>)</xsl:text>
-	</xsl:template> -->
+	</xsl:template>
 
 	<!-- produces a comma-separated list of generic template parameter names -->
 	<!-- comma character is URL-encoded so as not to create sub-index entries -->
@@ -226,10 +232,14 @@
 			<xsl:value-of select="$name" />
 			<xsl:call-template name="csTemplateText" />
 		</name>
-		<!--<name language="v">
+		<name language="xs">
+			<xsl:value-of select="$name" />
+			<xsl:call-template name="xsTemplateText" />
+		</name>
+		<name language="v">
 			<xsl:value-of select="$name" />
 			<xsl:call-template name="vbTemplateText" />
-		</name>-->
+		</name>
 	</xsl:template>
 
 	<xsl:template match="template" mode="index">
@@ -243,12 +253,18 @@
 			<xsl:if test="number(@rank) &gt; 1">,</xsl:if>
 			<xsl:text>]</xsl:text>
 		</name>
-		<!--<name language="v">
+		<name language="xs">
+			<xsl:apply-templates select="type|arrayOf|pointerTo|referenceTo|template|specialization|templates" mode="index"/>
+			<xsl:text>[</xsl:text>
+			<xsl:if test="number(@rank) &gt; 1">,</xsl:if>
+			<xsl:text>]</xsl:text>
+		</name>
+		<name language="v">
 			<xsl:apply-templates select="type|arrayOf|pointerTo|referenceTo|template|specialization|templates" mode="index"/>
 			<xsl:text>(</xsl:text>
 			<xsl:if test="number(@rank) &gt; 1">,</xsl:if>
 			<xsl:text>)</xsl:text>
-		</name>-->
+		</name>
 	</xsl:template>
 
 	<xsl:template match="pointerTo" mode="index">

@@ -111,22 +111,21 @@
 	NOTE - the MSHCComponent recognizes these bits and post-processes them into the format used
 	       by the MS Help Viewer.
 	============================================================================================= -->
-
+	<!-- X# simplified type = member separator -->
 	<xsl:template name="t_decoratedNameSep">
+		<xsl:text>.</xsl:text>
+	</xsl:template>
+	<xsl:template name="t_decoratedNameSepOrig">
 		<span class="languageSpecificText">
-			<span class="cpp">::</span>
 			<span class="nu">.</span>
 		</span>
 	</xsl:template>
-
 	<xsl:template name="t_nullKeyword">
 		<xsl:param name="p_syntaxKeyword" select="''"/>
 		<xsl:choose>
 			<xsl:when test="$p_syntaxKeyword">
 				<span class="keyword">
 					<span class="languageSpecificText">
-						<span class="vb">Nothing</span>
-						<span class="cpp">nullptr</span>
 						<span class="nu">null</span>
 					</span>
 				</span>
@@ -145,7 +144,6 @@
 			<xsl:when test="$p_syntaxKeyword">
 				<span class="keyword">
 					<span class="languageSpecificText">
-						<span class="vb">Shared</span>
 						<span class="nu">static</span>
 					</span>
 				</span>
@@ -164,7 +162,6 @@
 			<xsl:when test="$p_syntaxKeyword">
 				<span class="keyword">
 					<span class="languageSpecificText">
-						<span class="vb">Overridable</span>
 						<span class="nu">virtual</span>
 					</span>
 				</span>
@@ -183,7 +180,6 @@
 			<xsl:when test="$p_syntaxKeyword">
 				<span class="keyword">
 					<span class="languageSpecificText">
-						<span class="vb">True</span>
 						<span class="nu">true</span>
 					</span>
 				</span>
@@ -202,7 +198,6 @@
 			<xsl:when test="$p_syntaxKeyword">
 				<span class="keyword">
 					<span class="languageSpecificText">
-						<span class="vb">False</span>
 						<span class="nu">false</span>
 					</span>
 				</span>
@@ -221,7 +216,6 @@
 			<xsl:when test="$p_syntaxKeyword">
 				<span class="keyword">
 					<span class="languageSpecificText">
-						<span class="vb">MustInherit</span>
 						<span class="nu">abstract</span>
 					</span>
 				</span>
@@ -240,7 +234,6 @@
 			<xsl:when test="$p_syntaxKeyword">
 				<span class="keyword">
 					<span class="languageSpecificText">
-						<span class="vb">NotInheritable</span>
 						<span class="nu">sealed</span>
 					</span>
 				</span>
@@ -256,8 +249,6 @@
 	<xsl:template name="t_inKeyword">
 		<span class="keyword">
 			<span class="languageSpecificText">
-				<span class="vb">In</span>
-				<span class="fs"></span>
 				<span class="nu">in</span>
 			</span>
 		</span>
@@ -266,8 +257,6 @@
 	<xsl:template name="t_outKeyword">
 		<span class="keyword">
 			<span class="languageSpecificText">
-				<span class="vb">Out</span>
-				<span class="fs"></span>
 				<span class="nu">out</span>
 			</span>
 		</span>
@@ -279,7 +268,6 @@
 			<xsl:when test="$p_syntaxKeyword">
 				<span class="keyword">
 					<span class="languageSpecificText">
-						<span class="vb">Async</span>
 						<span class="nu">async</span>
 					</span>
 				</span>
@@ -298,8 +286,6 @@
 			<xsl:when test="$p_syntaxKeyword">
 				<span class="keyword">
 					<span class="languageSpecificText">
-						<span class="vb">Await</span>
-						<span class="fs">let!</span>
 						<span class="nu">await</span>
 					</span>
 				</span>
@@ -318,13 +304,10 @@
 			<xsl:when test="$p_syntaxKeyword">
 				<span class="keyword">
 					<span class="languageSpecificText">
-						<span class="vb">Async</span>
 						<span class="nu">async</span>
 					</span>
 				</span>/<span class="keyword">
 					<span class="languageSpecificText">
-						<span class="vb">Await</span>
-						<span class="fs">let!</span>
 						<span class="nu">await</span>
 					</span>
 				</span>

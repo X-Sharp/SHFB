@@ -54,7 +54,7 @@ function OnLoad(defaultLanguage)
     var defLang;
 
     if(typeof (defaultLanguage) == "undefined" || defaultLanguage == null || defaultLanguage == "")
-        defLang = "vb";
+        defLang = "xs";
     else
         defLang = defaultLanguage;
 
