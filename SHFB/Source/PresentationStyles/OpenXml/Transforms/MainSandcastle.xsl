@@ -379,6 +379,16 @@
 									<xsl:with-param name="qualified" select="true()" />
 								</xsl:apply-templates>
 							</xsl:when>
+							<xsl:when test="/document/reference/attributes/attribute/type[@api='T:System.Runtime.CompilerServices.IsReadOnlyAttribute']">
+								<xsl:apply-templates select="/document/reference/attributes/attribute/type[@api='T:System.Runtime.CompilerServices.IsReadOnlyAttribute']/../argument/typeValue/type" mode="link">
+									<xsl:with-param name="qualified" select="true()" />
+								</xsl:apply-templates>
+							</xsl:when>
+							<xsl:when test="/document/reference/attributes/attribute/type[@api='T:System.Runtime.CompilerServices.IsByRefLikeAttribute']">
+								<xsl:apply-templates select="/document/reference/attributes/attribute/type[@api='T:System.Runtime.CompilerServices.IsByRefLikeAttribute']/../argument/typeValue/type" mode="link">
+									<xsl:with-param name="qualified" select="true()" />
+								</xsl:apply-templates>
+							</xsl:when>
 							<xsl:when test="/document/reference/apidata[@subgroup='event']">
 								<xsl:apply-templates select="/document/reference/eventhandler/type" mode="link">
 									<xsl:with-param name="qualified" select="true()" />
@@ -451,7 +461,7 @@
 						</w:tblPr>
 						<w:tr>
 							<w:trPr>
-								<w:cnfStyle w:firstRow="1" />
+								<w:cnfStyle w:val="100000000000" />
 							</w:trPr>
 							<w:tc>
 								<w:p>
@@ -504,7 +514,7 @@
 						</w:tblPr>
 						<w:tr>
 							<w:trPr>
-								<w:cnfStyle w:firstRow="1" />
+								<w:cnfStyle w:val="100000000000" />
 							</w:trPr>
 							<w:tc>
 								<w:p>
@@ -587,7 +597,7 @@
 						</w:tblPr>
 						<w:tr>
 							<w:trPr>
-								<w:cnfStyle w:firstRow="1" />
+								<w:cnfStyle w:val="100000000000" />
 							</w:trPr>
 							<w:tc>
 								<w:p>
@@ -775,7 +785,7 @@
 			</w:tblPr>
 			<w:tr>
 				<w:trPr>
-					<w:cnfStyle w:firstRow="1" />
+					<w:cnfStyle w:val="100000000000" />
 				</w:trPr>
 				<w:tc>
 					<w:p>

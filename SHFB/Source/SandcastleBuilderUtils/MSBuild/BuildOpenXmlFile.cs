@@ -2,8 +2,8 @@
 // System  : Sandcastle Help File Builder MSBuild Tasks
 // File    : BuildOpenXmlFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/02/2018
-// Note    : Copyright 2014-2018, Eric Woodruff, All rights reserved
+// Updated : 06/15/2019
+// Note    : Copyright 2014-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the MSBuild task used to finish up creation of the Open XML file parts and compress the
@@ -20,7 +20,7 @@
 //===============================================================================================================
 
 // Ignore Spelling: Za num ilvl lvl ul li tbl tc br nolink selflink typeparameter img src cx cy xfrm prst
-// Ignore Spelling: rect uri pic dxa
+// Ignore Spelling: rect uri pic dxa dstrike kern sz bdr shd rtl lang
 
 using System;
 using System.Collections.Generic;
@@ -51,18 +51,18 @@ namespace SandcastleBuilder.Utils.MSBuild
 
         // NOTE: These namespaces must appear in MainConceptual.xsl and MainSandcastle.xsl with the given XML
         // namespace identifiers.
-        private static XNamespace w = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
-        private static XNamespace r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
-        private static XNamespace wp = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";
-        private static XNamespace a = "http://schemas.openxmlformats.org/drawingml/2006/main";
-        private static XNamespace a14 = "http://schemas.microsoft.com/office/drawing/2010/main";
-        private static XNamespace pic = "http://schemas.openxmlformats.org/drawingml/2006/picture";
+        private static readonly XNamespace w = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+        private static readonly XNamespace r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+        private static readonly XNamespace wp = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";
+        private static readonly XNamespace a = "http://schemas.openxmlformats.org/drawingml/2006/main";
+        private static readonly XNamespace a14 = "http://schemas.microsoft.com/office/drawing/2010/main";
+        private static readonly XNamespace pic = "http://schemas.openxmlformats.org/drawingml/2006/picture";
 
         // This is used in the content types file as its default namespace
-        private static XNamespace ct = "http://schemas.openxmlformats.org/package/2006/content-types";
+        private static readonly XNamespace ct = "http://schemas.openxmlformats.org/package/2006/content-types";
 
         // This is used in the relationships part file as its default namespace
-        private static XNamespace pr = "http://schemas.openxmlformats.org/package/2006/relationships";
+        private static readonly XNamespace pr = "http://schemas.openxmlformats.org/package/2006/relationships";
 
         private static Regex reBadChars = new Regex("[^_0-9A-Za-z]");
         private static Regex reLineBreaks = new Regex("\r\n|\r|\n");
@@ -361,6 +361,9 @@ namespace SandcastleBuilder.Utils.MSBuild
             // Make one final pass to wrap remaining stray text nodes that showed up after handling everything.
             // This can happen for stuff in span elements which are skipped by this method.
             WrapStrayElementNodes(document);
+
+            // Ensure tables are at the proper level and have grid columns
+            CleanupTables(document);
         }
 
         /// <summary>
@@ -551,7 +554,7 @@ namespace SandcastleBuilder.Utils.MSBuild
         private static void ConvertHtmlLineBreaks(XDocument document)
         {
             foreach(var lineBreak in document.Descendants("br").ToList())
-                lineBreak.ReplaceWith(new XElement(w + "br"));
+                lineBreak.ReplaceWith(new XElement(w + "r", new XElement(w + "br")));
         }
 
         /// <summary>
@@ -579,6 +582,47 @@ namespace SandcastleBuilder.Utils.MSBuild
                         new XAttribute(XNamespace.Xml + "space", "preserve"), text.Value));
 
                 text.ReplaceWith(wrap);
+            }
+        }
+
+        /// <summary>
+        /// This cleans up table elements so that they include the correct w:tblGrid
+        /// element and that they are not wrapped within a w:p element.
+        /// </summary>
+        /// <param name="document">The document in which to clean up any tables</param>
+        private static void CleanupTables(XDocument document)
+        {
+            foreach(var table in document.Descendants(w + "tbl").ToArray())
+            {
+                XElement tblGrid = table.Element(w + "tblGrid");
+
+                if(tblGrid == null)
+                {
+                    // Get the count of table cells and create that many <w:gridCol /> elements
+                    // in our <w:tblGrid> element
+                    int cellCount = table.Elements(w + "tr").Max(tr => tr.Elements(w + "tc").Count());
+                    tblGrid = new XElement(w + "tblGrid",
+                        Enumerable.Range(0, cellCount).Select(_ => new XElement(w + "gridCol")));
+
+                    // then put the <w:tblGrid> element just before the first <w:tr>
+                    table.Element(w + "tr").AddBeforeSelf(tblGrid);
+                }
+
+                // Check if this table needs to be "unwrapped" from a parent <w:p>
+                if(table.Parent.Name == w + "p")
+                {
+                    var p = table.Parent;
+
+                    // The table may be preceded by a paragraph containing a title and followed by other content
+                    // such as another table. As such, move all content to the parent.
+                    foreach(var child in p.Elements().ToArray())
+                    {
+                        child.Remove();
+                        p.AddBeforeSelf(child);
+                    }
+
+                    p.Remove();
+                }
             }
         }
 
@@ -788,6 +832,13 @@ namespace SandcastleBuilder.Utils.MSBuild
                 span.Add(content);
             }
 
+            // Ensure that the order of rPr children is correct
+            runProps = ReorderChildren(runProps, new[] { "rStyle", "rFonts", "b", "bCs", "i", "iCs", "caps",
+                "smallCaps", "strike", "dstrike", "outline", "shadow", "emboss", "imprint", "noProof",
+                "snapToGrid", "vanish", "webHidden", "color", "spacing", "w", "kern", "position", "sz", "szCs",
+                "highlight", "u", "effect", "bdr", "shd", "fitText", "vertAlign", "rtl", "cs", "em", "lang",
+                "eastAsianLayout", "specVanish", "oMath" });
+
             // Add the run properties to each child run
             foreach(var run in span.Elements(w + "r"))
                 run.AddFirst(new XElement(runProps));
@@ -805,6 +856,21 @@ namespace SandcastleBuilder.Utils.MSBuild
 
             // And finally, remove the span
             span.Remove();
+        }
+
+        /// <summary>
+        /// Reorders an elements' children by a specific ordering.
+        /// </summary>
+        /// <param name="element">Element whose children should be in a specific order</param>
+        /// <param name="orderings">The specific order of child element, by local name</param>
+        /// <returns><paramref name="element" /> with its children reordered.</returns>
+        private static XElement ReorderChildren(XElement element, IList<string> orderings)
+        {
+            var orderedChildren = element.Elements()
+                                         .OrderBy(e => orderings.IndexOf(e.Name.LocalName))
+                                         .ToArray();
+            element.ReplaceNodes(orderedChildren);
+            return element;
         }
         #endregion
 
@@ -912,9 +978,7 @@ namespace SandcastleBuilder.Utils.MSBuild
 
                         foreach(var content in anchor.Nodes())
                         {
-                            XText text = content as XText;
-
-                            if(text == null || text.Parent != anchor)
+                            if(!(content is XText text) || text.Parent != anchor)
                                 hyperlink.Add(content);
                             else
                                 hyperlink.Add(new XElement(w + "r", new XElement(w + "t", text.Value)));
@@ -999,7 +1063,6 @@ namespace SandcastleBuilder.Utils.MSBuild
         private void ConvertHtmlImages(XDocument document)
         {
             string alt, src, id;
-            long cx, cy;
 
             foreach(var image in document.Descendants("img").ToList())
             {
@@ -1022,7 +1085,7 @@ namespace SandcastleBuilder.Utils.MSBuild
                 // The drawing element is rather complex so we'll build the parts separately to make this a bit
                 // more readable.  Note that it requires us to set the actual extents of the image ("cx" and "cy"
                 // in the "xfrm" and "extent" elements).
-                this.DetermineImageSize(src, out cx, out cy);
+                this.DetermineImageSize(src, out long cx, out long cy);
 
                 var xfrm = new XElement(a + "xfrm",
                     new XElement(a + "off", new XAttribute("x", "0"), new XAttribute("y", "0")),
@@ -1077,6 +1140,18 @@ namespace SandcastleBuilder.Utils.MSBuild
                         new XAttribute("distL", "0"), new XAttribute("distR", "0"),
                             extent, docPr, cNvGraphicFramePr, graphic));
 
+                // Ensure the <w:drawing> is within a <w:r> and not a bare <w:p>.  If it's within the body,
+                // add the containing paragraph too.
+                if(image.Parent.Name != w + "r")
+                {
+                    var p = image.Parent;
+
+                    drawing = new XElement(w + "r", drawing);
+
+                    if(p.Name != w + "p")
+                        drawing = new XElement(w + "p", drawing);
+                }
+
                 image.ReplaceWith(drawing);
                 imageId++;
             }
@@ -1090,12 +1165,10 @@ namespace SandcastleBuilder.Utils.MSBuild
         /// <param name="cy">On return, this will contain the height of the image in English Metric Units</param>
         private void DetermineImageSize(string imageFilename, out long cx, out long cy)
         {
-            SizeF size;
-
             // All images should be found relative to the main document part's folder
             imageFilename = Path.Combine(this.WorkingFolder, @"word\" + imageFilename);
 
-            if(!imageSizes.TryGetValue(imageFilename, out size))
+            if(!imageSizes.TryGetValue(imageFilename, out SizeF size))
             {
                 size = new SizeF(1.0f, 1.0f);
 
@@ -1228,10 +1301,10 @@ namespace SandcastleBuilder.Utils.MSBuild
                         // we're making an assumption here about the indent widths based on the default style
                         // sheet.
                         props.Add(
-                            new XElement(w + "contextualSpacing",
-                                new XAttribute(w + "val", "0")),
                             new XElement(w + "ind",
-                                new XAttribute(w + "left", ((level + 1) * 720).ToString(CultureInfo.InvariantCulture))));
+                                new XAttribute(w + "left", ((level + 1) * 720).ToString(CultureInfo.InvariantCulture))),
+                            new XElement(w + "contextualSpacing",
+                                new XAttribute(w + "val", "0")));
                     }
                 }
 
@@ -1354,7 +1427,7 @@ namespace SandcastleBuilder.Utils.MSBuild
                             filename = filename.Substring(3);
                         else
                             if(!File.Exists(Path.Combine(this.WorkingFolder, filename)))
-                                filename = @"word\" + filename;
+                            filename = @"word\" + filename;
 
                         filename = Path.GetFullPath(Path.Combine(this.WorkingFolder, filename));
 

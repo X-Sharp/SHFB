@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -267,10 +267,7 @@
     <Compile Include="IntelliSense\RoslynHacks\CommandFilter.cs" />
     <Compile Include="IntelliSense\RoslynHacks\RoslynKeyboardFilter.cs" />
     <Compile Include="IntelliSense\RoslynHacks\RoslynTextViewCreationListener.cs" />
-    <Compile Include="IntelliSense\RoslynHacks\RoslynUtilities.cs" />
     <Compile Include="IntelliSense\RoslynHacks\TextViewCommandFilter.cs" />
-    <Compile Include="IntelliSense\RoslynHacks\ToolTipProvider.cs" />
-    <Compile Include="IntelliSense\RoslynHacks\WpfHelper.cs" />
     <Compile Include="IntelliSense\SandcastleCompletion.cs" />
     <Compile Include="MefProviderOptions.cs" />
     <Compile Include="PropertyPages\BuildEventPropertiesPageControl.cs">
@@ -459,7 +456,7 @@
       <RootPath>Templates\Projects\PresentationStyleCS</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
-    <ZipProject Include="Templates\Projects\PresentationStyleCS\PresentationStyle.vstemplate">
+    <ZipProject Include="Templates\Projects\PresentationStyleCS\PresentationStyleCS.vstemplate">
       <RootPath>Templates\Projects\PresentationStyleCS</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
@@ -475,7 +472,7 @@
       <RootPath>Templates\Projects\PlugInCS</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
-    <ZipProject Include="Templates\Projects\PlugInCS\PlugIn.vstemplate">
+    <ZipProject Include="Templates\Projects\PlugInCS\PlugInCS.vstemplate">
       <RootPath>Templates\Projects\PlugInCS</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
@@ -491,7 +488,7 @@
       <RootPath>Templates\Projects\BuildComponentCS</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
-    <ZipProject Include="Templates\Projects\BuildComponentCS\BuildComponent.vstemplate">
+    <ZipProject Include="Templates\Projects\BuildComponentCS\BuildComponentCS.vstemplate">
       <RootPath>Templates\Projects\BuildComponentCS</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
@@ -507,7 +504,7 @@
       <RootPath>Templates\Projects\SyntaxGeneratorCS</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
-    <ZipProject Include="Templates\Projects\SyntaxGeneratorCS\SyntaxGenerator.vstemplate">
+    <ZipProject Include="Templates\Projects\SyntaxGeneratorCS\SyntaxGeneratorCS.vstemplate">
       <RootPath>Templates\Projects\SyntaxGeneratorCS</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
@@ -527,7 +524,7 @@
       <RootPath>Templates\Projects\PresentationStyleVB</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
-    <ZipProject Include="Templates\Projects\PresentationStyleVB\PresentationStyle.vstemplate">
+    <ZipProject Include="Templates\Projects\PresentationStyleVB\PresentationStyleVB.vstemplate">
       <RootPath>Templates\Projects\PresentationStyleVB</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
@@ -543,7 +540,7 @@
       <RootPath>Templates\Projects\PlugInVB</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
-    <ZipProject Include="Templates\Projects\PlugInVB\PlugIn.vstemplate">
+    <ZipProject Include="Templates\Projects\PlugInVB\PlugInVB.vstemplate">
       <RootPath>Templates\Projects\PlugInVB</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
@@ -559,7 +556,7 @@
       <RootPath>Templates\Projects\BuildComponentVB</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
-    <ZipProject Include="Templates\Projects\BuildComponentVB\BuildComponent.vstemplate">
+    <ZipProject Include="Templates\Projects\BuildComponentVB\BuildComponentVB.vstemplate">
       <RootPath>Templates\Projects\BuildComponentVB</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
@@ -575,7 +572,7 @@
       <RootPath>Templates\Projects\SyntaxGeneratorVB</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
-    <ZipProject Include="Templates\Projects\SyntaxGeneratorVB\SyntaxGenerator.vstemplate">
+    <ZipProject Include="Templates\Projects\SyntaxGeneratorVB\SyntaxGeneratorVB.vstemplate">
       <RootPath>Templates\Projects\SyntaxGeneratorVB</RootPath>
       <OutputSubPath>Documentation</OutputSubPath>
     </ZipProject>
