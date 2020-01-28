@@ -186,6 +186,8 @@
     <Compile Include="XPathReflectionFileFilterConfigDlg.Designer.cs">
       <DependentUpon>XPathReflectionFileFilterConfigDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="XSharpDocChanger.cs" />
+    <Compile Include="XSharpFunctionOutput.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SandcastleBuilderUtils\SandcastleBuilderUtils.csproj">

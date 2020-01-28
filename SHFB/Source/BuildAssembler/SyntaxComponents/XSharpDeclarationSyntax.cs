@@ -1131,7 +1131,7 @@ namespace Microsoft.Ddue.Tools
                     WriteAttribute("T:System.Runtime.InteropServices.PreserveSigAttribute", true, writer);
         }
 
-        private void WriteValue(XPathNavigator parent, SyntaxWriter writer)
+        private void WriteValue(XPathNavigator parent, SyntaxWriter writer, string typeName = "")
         {
             XPathNavigator type = parent.SelectSingleNode(attributeTypeExpression);
             XPathNavigator value = parent.SelectSingleNode(valueExpression);
