@@ -4,8 +4,15 @@
 // All other rights reserved.
 
 // Change history:
-// 03/20/2017 - RvdH Created initial X# language support
-// 05/10/2018 - RvdH Adjusted X# type names and replaced reference links with keywords
+// 01/30/2012 - EFW - Fixed WriteValue() so that it outputs numeric attribute values.
+// 02/09/2012 - EFW - Added support for optional parameters and property getter/setter attributes.
+// 02/14/2012 - EFW - Added support for fixed keyword
+// 11/29/2013 - EFW - Added support for metadata based interop attributes
+// 12/20/2013 - EFW - Updated the syntax generator to be discoverable via MEF
+// 08/01/2014 - EFW - Added support for resource item files containing the localized titles, messages, etc.
+// 11/20/2014 - EFW - Added support for writing out method parameter attributes
+// 10/08/2015 - EFW - Added support for writing out the value of constant fields
+
 using System;
 using System.Globalization;
 using System.IO;
@@ -68,7 +75,7 @@ namespace Microsoft.Ddue.Tools
 
             //System.Diagnostics.Debugger.Launch();
             string name = reflection.Evaluate(apiNameExpression).ToString();
-            InFunctionsClass = (String.Compare(name, "Functions", true) == 0);
+            InFunctionsClass = (string.Compare(name, "Functions", StringComparison.OrdinalIgnoreCase) == 0);
             bool isAbstract = (bool)reflection.Evaluate(apiIsAbstractTypeExpression);
             bool isSealed = (bool)reflection.Evaluate(apiIsSealedTypeExpression);
             bool isSerializable = (bool)reflection.Evaluate(apiIsSerializableTypeExpression);
@@ -191,8 +198,6 @@ namespace Microsoft.Ddue.Tools
         /// <inheritdoc />
         public override void WriteConstructorSyntax(XPathNavigator reflection, SyntaxWriter writer)
         {
-
-            string name = (string)reflection.Evaluate(apiContainingTypeNameExpression);
             bool isStatic = (bool)reflection.Evaluate(apiIsStaticExpression);
 
             WriteAttributes(reflection, writer);
@@ -207,7 +212,6 @@ namespace Microsoft.Ddue.Tools
             writer.WriteString(" ");
             writer.WriteKeyword("CONSTRUCTOR");
             WriteMethodParameters(reflection, writer);
-
         }
 
         /// <inheritdoc />
@@ -271,7 +275,6 @@ namespace Microsoft.Ddue.Tools
         /// <param name="writer">The syntax writer to which the type reference is written</param>
         protected override void WriteNormalTypeReference(string api, SyntaxWriter writer)
         {
-            //System.Diagnostics.Trace.WriteLine(api);
             switch (api)
             {
                 case "T:System.Void":
@@ -640,7 +643,6 @@ namespace Microsoft.Ddue.Tools
         public override void WriteEventSyntax(XPathNavigator reflection, SyntaxWriter writer)
         {
             string name = (string)reflection.Evaluate(apiNameExpression);
-            XPathNavigator handler = reflection.SelectSingleNode(apiHandlerOfEventExpression);
             bool isExplicit = (bool)reflection.Evaluate(apiIsExplicitImplementationExpression);
 
             WriteAttributes(reflection, writer);
@@ -888,8 +890,7 @@ namespace Microsoft.Ddue.Tools
 
                 if (att == "T:XSharp.Internal.DefaultParameterValueAttribute")
                     continue;
-                 
-                if(!String.IsNullOrEmpty(indent))
+                if (!String.IsNullOrEmpty(indent))
                     writer.WriteString(indent);
 
                 writer.WriteString("[");
@@ -1130,7 +1131,7 @@ namespace Microsoft.Ddue.Tools
                     WriteAttribute("T:System.Runtime.InteropServices.PreserveSigAttribute", true, writer);
         }
 
-        private void WriteValue(XPathNavigator parent, SyntaxWriter writer, string typeName = "")
+        private void WriteValue(XPathNavigator parent, SyntaxWriter writer)
         {
             XPathNavigator type = parent.SelectSingleNode(attributeTypeExpression);
             XPathNavigator value = parent.SelectSingleNode(valueExpression);
@@ -1220,7 +1221,7 @@ namespace Microsoft.Ddue.Tools
 
                         case "T:System.Single":
                             writer.WriteString(text);
-                            //writer.WriteString("f");
+                            writer.WriteString("f");
                             break;
 
                         default:

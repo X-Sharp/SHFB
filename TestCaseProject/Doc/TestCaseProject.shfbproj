@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Import the common props to support NuGet restore -->
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <!-- A framework version is required for NuGet restore, this can be any valid version -->
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <!-- The configuration and platform will be used to determine which
          assemblies to include from solution and project documentation
          sources -->
@@ -74,9 +78,6 @@
       <NamespaceSummaryItem name="TestDoc.Generics" isDocumented="True">&lt;inheritdoc cref="N:TestDoc"/&gt;
 &lt;p/&gt;Test of the &amp;lt;inheritdoc /&amp;gt; tag in namespace comments.  The stuff from the &lt;b&gt;TestDoc&lt;/b&gt; namespace should be above this paragraph.</NamespaceSummaryItem>
       <NamespaceSummaryItem name="TestDoc.IndexTocBugs" isDocumented="True">CHM duplicate index keyword test and &amp;lt;see&amp;gt;/&amp;lt;seealso&amp;gt; inner text tests.</NamespaceSummaryItem>
-      <NamespaceSummaryItem name="TestDoc.Generics (Group)" isGroup="True" isDocumented="True">These namespaces contain various tests for documenting generic types.</NamespaceSummaryItem>
-      <NamespaceSummaryItem name="TestDoc.HierarchicalToc (Group)" isGroup="True" isDocumented="True">These namespaces are used to test the namespace grouping support.</NamespaceSummaryItem>
-      <NamespaceSummaryItem name="TestDoc (Group)" isGroup="True" isDocumented="True">These namespaces contain various classes used to test the Sandcastle Help File Builder and the Sandcastle tools.</NamespaceSummaryItem>
       <NamespaceSummaryItem name="TestDoc.ExtensionMethods" isDocumented="True">Extension method tests</NamespaceSummaryItem>
       <NamespaceSummaryItem name="TestDoc.Generics.InheritanceBug" isDocumented="True">Inheritance bug tests</NamespaceSummaryItem>
       <NamespaceSummaryItem name="TestDoc.Generics.InterfaceFailure" isDocumented="True">Interface failure test</NamespaceSummaryItem>
@@ -93,6 +94,11 @@
       <NamespaceSummaryItem name="TestDoc.Overloads" isDocumented="True">Overloads tests</NamespaceSummaryItem>
       <NamespaceSummaryItem name="TestDoc.SealedOverrideBug" isDocumented="True" />
       <NamespaceSummaryItem name="TestDoc.CodeSnippetGrouping" isDocumented="True">Code snippet grouping test cases for the new SyntaxComponent grouping and sorting support.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="TestDoc.BrowsableAttributes" isDocumented="True" />
+      <NamespaceSummaryItem name="TestDoc.LanguageFeatures" isDocumented="True">Language feature tests</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="TestDoc (Group)" isGroup="True" isDocumented="True" />
+      <NamespaceSummaryItem name="TestDoc.Generics (Group)" isGroup="True" isDocumented="True" />
+      <NamespaceSummaryItem name="TestDoc.HierarchicalToc (Group)" isGroup="True" isDocumented="True" />
     </NamespaceSummaries>
     <PlugInConfigurations>
       <PlugInConfig id="Additional Content Only" enabled="False">
@@ -412,8 +418,16 @@
   <ItemGroup>
     <ResourceItems Include="ResourceItems.items" />
   </ItemGroup>
+  <!-- Uncomment this to use the nuget packages when SHFB is not installed locally, e.g. in the CI build pipeline.
+       Update the package versions as required.
+  <ItemGroup>
+    <PackageReference Include="EWSoftware.SHFB" Version="2019.9.15" />
+    <PackageReference Include="EWSoftware.SHFB.NETFramework" Version="4.8.0" />
+  </ItemGroup> -->
+  <!-- Import the common build targets during NuGet restore because before the packages are installed, $(SHFBROOT) is not set yet -->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="'$(MSBuildRestoreSessionId)' != ''" />
   <!-- Import the SHFB build targets -->
-  <Import Project="$(SHFBROOT)\SandcastleHelpFileBuilder.targets" />
+  <Import Project="$(SHFBROOT)\SandcastleHelpFileBuilder.targets" Condition="'$(MSBuildRestoreSessionId)' == ''" />
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>

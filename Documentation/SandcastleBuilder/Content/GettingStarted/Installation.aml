@@ -27,6 +27,12 @@ compilers, it contains instructions on where to get them and how to install them
 				<para>When using the guided installation, you can skip the <ui>Requirements</ui> section below as it
 takes care of all of the required steps.  See the <ui>Recommended Additions</ui> sections for additional tools
 not included in the guided installation that you may find useful.</para>
+
+				<para>The help file builder tools and the Visual Studio package can be installed manually by running the
+MSI and VSIX installers found in the <localUri>.\InstallResources</localUri> folder extracted from the guided
+installer download.  If installing the tools manually, the optional components such as the XML schemas and
+snippets will not be installed.  You will also need to ensure the requirements noted below are also present if
+needed.</para>
 			</content>
 		</section>
 
@@ -102,18 +108,30 @@ files.  These are installed as part of Visual Studio.</para>
 						<para>If you need a spell checker for Visual Studio, the <externalLink>
 <linkText>Visual Studio Spell Checker</linkText>
 <linkAlternateText>Visual Studio Spell Checker</linkAlternateText>
-<linkUri>http://visualstudiogallery.msdn.microsoft.com/a23de100-31a1-405c-b4b7-d6be40c3dfff</linkUri>
+<linkUri>https://marketplace.visualstudio.com/items?itemName=EWoodruff.VisualStudioSpellCheckerVS2017andLater</linkUri>
 <linkTarget>_blank</linkTarget>
 </externalLink> extension can be downloaded and installed from the <Bold>Visual Studio Gallery</Bold>.  It is an
 editor extension that checks the spelling of comments, strings, and plain text as you type or interactively with
 a tool window.  Support is included for spell checking source code, XML files, and MAML topic files.</para>
 					</listItem>
 
+						<listItem>
+							<para>For extended XML comments completion support in Visual Studio 2019 and later, install the
+<externalLink>
+<linkText>Extended XML Documentation Comments Completion Provider</linkText>
+<linkAlternateText>Extended XML Documentation Comments Completion Provider</linkAlternateText>
+<linkUri>https://marketplace.visualstudio.com/items?itemName=EWoodruff.ExtendedDocCommentsProvider</linkUri>
+<linkTarget>_blank</linkTarget>
+</externalLink> package which can be downloaded and installed from the Visual Studio Gallery.  It is an editor
+extension that augments the standard XML documentation comments elements with custom elements, attributes, and
+attribute values supported by the Sandcastle Help File Builder and other documentation tools.</para>
+						</listItem>
+
 					<listItem>
 						<para>For a Visual Studio add-in used to create XML comments automatically, check out SubMain's
 <externalLink>
 	<linkText>GhostDoc</linkText>
-	<linkUri>http://submain.com/products/ghostdoc.aspx</linkUri>
+	<linkUri>https://submain.com/products/ghostdoc.aspx</linkUri>
 	<linkTarget>_blank</linkTarget>
 </externalLink>.</para>
 					</listItem>
