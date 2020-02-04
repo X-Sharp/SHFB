@@ -120,7 +120,7 @@ namespace SandcastleBuilder.PlugIns
                 if(Directory.Exists(htmlFolderPath))
                 {
                     builder.ReportProgress("  Editing html topic pages...");
-                    XSharpDocChanger.editHtmlFolder(builder, htmlFolderPath);
+                    XSharpDocChanger.editHtmlFolder(builder, htmlFolderPath,format);
                 }
                 else
                 {
@@ -161,9 +161,9 @@ namespace SandcastleBuilder.PlugIns
                 if(Directory.Exists(htmlFolderPath))
                 {
                     builder.ReportProgress("  Editing html topic pages...");
-                    XSharpDocChanger.editHtmlFolder(builder, htmlFolderPath);
-                    builder.ReportProgress("   Editing TOC and index");
-                    XSharpDocChanger.editHtmlFolderForMSHV(builder, htmlFolderPath);
+                    XSharpDocChanger.editHtmlFolder(builder, htmlFolderPath, format);
+                     // builder.ReportProgress("   Editing TOC and index");
+                    //XSharpDocChanger.editHtmlFolderForMSHV(builder, htmlFolderPath);
                 }
                 else
                 {
@@ -177,9 +177,8 @@ namespace SandcastleBuilder.PlugIns
                 if(Directory.Exists(htmlFolderPath))
                 {
                     builder.ReportProgress("  Editing html topic pages...");
-                    XSharpDocChanger.editHtmlFolder(builder, htmlFolderPath);
-                    builder.ReportProgress("  Editing website TOC...");
-                    XSharpDocChanger.editForWebsiteFolder(builder,htmlFolderPath);
+                    XSharpDocChanger.editHtmlFolder(builder, htmlFolderPath, format);
+                    //XSharpDocChanger.editForWebsiteFolder(builder,htmlFolderPath);
                 }
             }
         }
@@ -231,7 +230,7 @@ namespace SandcastleBuilder.PlugIns
                 replaceListTitles(htmlName, type);
             }
         }
-        static  void editHtmlFolder(BuildProcess builder, string path)
+        static  void editHtmlFolder(BuildProcess builder, string path, HelpFileFormats format)
         {
             string[] htmlFilesPaths = Directory.GetFiles(path, "*.htm", SearchOption.TopDirectoryOnly);
             // Then we classify the Files into different types
@@ -252,10 +251,20 @@ namespace SandcastleBuilder.PlugIns
             int counter = 0;
             foreach(Tuple<string, FileType> fileWithType in filesWithType)
             {
+                string fileName = fileWithType.Item1;
+                FileType filetype = fileWithType.Item2;
                 // edit the page itself
-                editPage(fileWithType.Item1, fileWithType.Item2);
+                editPage(fileName, filetype);
                 // edit all the typeNames on the page
                 editForTypeNames(fileWithType.Item1);
+                if (format == HelpFileFormats.MSHelpViewer)
+                {
+                    editFileForMSHV(fileName, filetype);
+                }
+                else if (format == HelpFileFormats.Website)
+                {
+                    editWebsiteToc(fileName);
+                }
                 counter++;
                 if(counter % 500 == 0)
                 {
@@ -593,35 +602,35 @@ namespace SandcastleBuilder.PlugIns
             return;
         }
 
-        static public void editHtmlFolderForMSHV(BuildProcess builder,string path)
-        {
-            string[] htmlFilesPaths = Directory.GetFiles(path, "*.htm", SearchOption.TopDirectoryOnly);
-            // Then we classify the Files into different types
-            List<Tuple<string, FileType>> filesWithType = new List<Tuple<string, FileType>>(htmlFilesPaths.Length);
-            foreach(string htmlFilePath in htmlFilesPaths)
-            {
-                string htmlFileName = htmlFilePath.Remove(0, path.Length + 1);// +1 comes from backslash character in the path ending.
-                htmlFileName = htmlFileName.Remove(htmlFileName.Length - 4); // remove the .htm at the end of the string.
-                FileType htmlType = findFileType(htmlFileName);
-                Tuple<string, FileType> fileWithType = new Tuple<string, FileType>(htmlFilePath, htmlType);
-                filesWithType.Add(fileWithType);
-            }
-            int counter = 0;
-            foreach(Tuple<string, XSharpDocChanger.FileType> fileWithType in filesWithType)
-            {
-                if(fileWithType.Item2 != FileType.other)
-                {
-                    XSharpDocChanger.editFileForMSHV(fileWithType.Item1, fileWithType.Item2);
-                }
-                counter++;
-                if(counter % 500 == 0)
-                {
-                    builder.ReportProgress("   Adjusted {0} pages", counter);
-                }
-            }
-            builder.ReportProgress("   Finished adjusting {0} pages", counter);
-            return;
-        }
+        //static public void editHtmlFolderForMSHV(BuildProcess builder,string path)
+        //{
+        //    string[] htmlFilesPaths = Directory.GetFiles(path, "*.htm", SearchOption.TopDirectoryOnly);
+        //    // Then we classify the Files into different types
+        //    List<Tuple<string, FileType>> filesWithType = new List<Tuple<string, FileType>>(htmlFilesPaths.Length);
+        //    foreach(string htmlFilePath in htmlFilesPaths)
+        //    {
+        //        string htmlFileName = htmlFilePath.Remove(0, path.Length + 1);// +1 comes from backslash character in the path ending.
+        //        htmlFileName = htmlFileName.Remove(htmlFileName.Length - 4); // remove the .htm at the end of the string.
+        //        FileType htmlType = findFileType(htmlFileName);
+        //        Tuple<string, FileType> fileWithType = new Tuple<string, FileType>(htmlFilePath, htmlType);
+        //        filesWithType.Add(fileWithType);
+        //    }
+        //    int counter = 0;
+        //    foreach(Tuple<string, XSharpDocChanger.FileType> fileWithType in filesWithType)
+        //    {
+        //        if(fileWithType.Item2 != FileType.other)
+        //        {
+        //            XSharpDocChanger.editFileForMSHV(fileWithType.Item1, fileWithType.Item2);
+        //        }
+        //        counter++;
+        //        if(counter % 500 == 0)
+        //        {
+        //            builder.ReportProgress("   Adjusted {0} pages", counter);
+        //        }
+        //    }
+        //    builder.ReportProgress("   Finished adjusting {0} pages", counter);
+        //    return;
+        //}
         static  void editFileForMSHV(string path, FileType type)
         {
             string fileText = File.ReadAllText(path);
@@ -778,21 +787,21 @@ namespace SandcastleBuilder.PlugIns
 
             return newTag;
         }
-        static public void editForWebsiteFolder(BuildProcess builder, string path)
-        {
-            string[] htmlFilesPaths = Directory.GetFiles(path, "*.htm", SearchOption.TopDirectoryOnly);
-            int counter = 0;
-            foreach(string filePath in htmlFilesPaths)
-            {
-                editWebsiteToc(filePath);
-                counter++;
-                if(counter % 500 == 0)
-                {
-                    builder.ReportProgress("   Adjusted {0} pages", counter);
-                }
-            }
-            builder.ReportProgress("   Finished adjusting {0} pages", counter);
-        }
+        //static public void editForWebsiteFolder(BuildProcess builder, string path)
+        //{
+        //    string[] htmlFilesPaths = Directory.GetFiles(path, "*.htm", SearchOption.TopDirectoryOnly);
+        //    int counter = 0;
+        //    foreach(string filePath in htmlFilesPaths)
+        //    {
+        //        editWebsiteToc(filePath);
+        //        counter++;
+        //        if(counter % 500 == 0)
+        //        {
+        //            builder.ReportProgress("   Adjusted {0} pages", counter);
+        //        }
+        //    }
+        //    builder.ReportProgress("   Finished adjusting {0} pages", counter);
+        //}
 
         static public void editForTypeNames(string path)
         {
@@ -804,11 +813,13 @@ namespace SandcastleBuilder.PlugIns
             string Symbol = "Symbol";
             string Psz = "Psz";
             string Usual = "Usual";
+            string Currency = "Currency";
             string ArrayReplace = "Array";
             string ArrayBaseReplace = "Array Of";
             string DateReplace = "Date";
             string SymbolReplace = "Symbol";
             string UsualReplace = "Usual";
+            string CurrencyReplace = "Currency";
             string PszReplace = "Psz";
             string FloatReplace = "Float";
             Dictionary<string, string> replacements = new Dictionary<string, string>();
@@ -819,6 +830,7 @@ namespace SandcastleBuilder.PlugIns
             replacements.Add(Symbol, SymbolReplace);
             replacements.Add(Psz, PszReplace);
             replacements.Add(Usual, UsualReplace);
+            replacements.Add(Currency, CurrencyReplace);
             string allText = File.ReadAllText(path);
             string or = "|";
             string pattern = delimiters + "(" + string.Join(or, new List<string>(replacements.Keys).ToArray()) + ")";
